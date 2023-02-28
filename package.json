@@ -1,0 +1,18 @@
+{
+  "name": "ali-oss-upload",
+  "version": "1.0.0",
+  "description": "support uploading files to ali oss",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/weirui88888/ali-oss-upload.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/weirui88888/ali-oss-upload/issues"
+  },
+  "homepage": "https://github.com/weirui88888/ali-oss-upload#readme"
+}
