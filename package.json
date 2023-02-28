@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "description": "support uploading files to ali oss",
   "main": "index.js",
+  "types": "src/index.d.ts",
+  "files": [
+    "src",
+    "lib"
+  ],
   "scripts": {
     "build:type": "tsc",
     "eslint": "eslint . --ext .js,.ts --fix",
@@ -13,7 +18,10 @@
     "type": "git",
     "url": "git+https://github.com/weirui88888/ali-oss-upload.git"
   },
-  "keywords": [],
+  "keywords": [
+    "alioss",
+    "upload"
+  ],
   "author": "",
   "license": "ISC",
   "bugs": {
