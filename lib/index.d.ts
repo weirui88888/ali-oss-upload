@@ -4,7 +4,7 @@ interface OssToken {
   expiration: string
   securityToken: string
 }
-type GetOssToken = (...args: any) => Promise<OssToken>
+declare type GetOssToken = (...args: any) => Promise<OssToken>
 interface UploadConfig {
   bucket: string
   domain: string

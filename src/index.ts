@@ -1,4 +1,5 @@
 import AliOss from 'ali-oss'
+console.log(AliOss)
 
 interface OssToken {
   accessKeyId: string
