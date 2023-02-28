@@ -4,6 +4,7 @@
   "description": "support uploading files to ali oss",
   "main": "index.js",
   "scripts": {
+    "build:type": "tsc",
     "eslint": "eslint . --ext .js,.ts --fix",
     "prettier": "prettier --write \"./**/*.{ts,js,json}\"",
     "prepare": "husky install"
@@ -40,6 +41,11 @@
     }
   },
   "lint-staged": {
-    "*.ts": "npm run eslint && npm run prettier"
+    "*.ts": "npm run eslint",
+    "*.ts": "npm run prettier"
+  },
+  "dependencies": {
+    "@types/ali-oss": "^6.16.7",
+    "ali-oss": "^6.17.1"
   }
 }
