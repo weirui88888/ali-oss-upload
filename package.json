@@ -20,6 +20,8 @@
   },
   "homepage": "https://github.com/weirui88888/ali-oss-upload#readme",
   "devDependencies": {
+    "@commitlint/cli": "^17.4.4",
+    "@commitlint/config-conventional": "^17.4.4",
     "@typescript-eslint/eslint-plugin": "^5.54.0",
     "@typescript-eslint/parser": "^5.54.0",
     "eslint": "^8.35.0",
@@ -32,10 +34,11 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "lint-staged",
+      "commit-msg": "npx --no-install commitlint --edit $1"
     }
   },
   "lint-staged": {
-    "*.{ts}": "npm run eslint && npm run prettier"
+    "*.ts": "npm run eslint && npm run prettier"
   }
 }
