@@ -1,9 +1,9 @@
 import typescript from '@rollup/plugin-typescript'
-import pkg from './package.json'
+import pkg from './package.json' assert { type: 'json' }
 
-import resolve from 'rollup-plugin-node-resolve'
+import resolve from '@rollup/plugin-node-resolve'
 import json from '@rollup/plugin-json'
-import { terser } from 'rollup-plugin-terser'
+import terser from '@rollup/plugin-terser'
 import commonjs from '@rollup/plugin-commonjs'
 import builtins from 'rollup-plugin-node-builtins'
 
