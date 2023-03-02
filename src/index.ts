@@ -4,6 +4,7 @@ import type { Options } from 'ali-oss'
 // TODO:是否需要日志信息（考虑日志有哪些）
 // TODO:中英文提示设置 zh,en
 // TODO:console.warn提示应采用安全的方式
+// TODO:extraUploadOptions类型
 
 interface StsToken {
   accessKeyId: string
@@ -12,7 +13,7 @@ interface StsToken {
   securityToken: string
 }
 
-type GetOssToken = (...args: any) => Promise<StsToken>
+type AsyncGetStsToken = (...args: any) => Promise<StsToken>
 
 interface UploadConfig {
   bucket: string // bucket库
@@ -20,9 +21,8 @@ interface UploadConfig {
   directory?: string // oss目录
   region: string // 地域节点
   extraUploadOptions?: Record<string, any> // 额外的配置
-  uuid?: boolean // 上传的文件名称是否使用uuid作为前缀
   log?: boolean // 控制是否打印相关日志，比如上传的文件
-  asyncGetOssToken?: GetOssToken
+  asyncGetStsToken?: AsyncGetStsToken
 }
 
 interface ConstructOssKeyOptions {
@@ -41,12 +41,12 @@ interface UploadOptions {
 
 class AliOssUpload {
   public bucket: string
-  public domain: string
+  public domain?: string
   public directory: string
   public region: string
   public defaultUploadOption: Record<string, any>
   public log: boolean
-  public asyncGetOssToken?: GetOssToken
+  public asyncGetStsToken?: AsyncGetStsToken
   constructor(config: UploadConfig) {
     const {
       bucket,
@@ -54,7 +54,7 @@ class AliOssUpload {
       region,
       directory = '',
       extraUploadOptions = {},
-      asyncGetOssToken,
+      asyncGetStsToken,
       log = false
     } = config
     this.bucket = bucket
@@ -62,7 +62,7 @@ class AliOssUpload {
     this.directory = directory
     this.region = region
     this.defaultUploadOption = extraUploadOptions
-    this.asyncGetOssToken = asyncGetOssToken
+    this.asyncGetStsToken = asyncGetStsToken
     this.log = log
   }
 
@@ -99,7 +99,7 @@ class AliOssUpload {
 
   upload = async (uploadOptions: UploadOptions) => {
     const { directory, stsToken, file, extraUploadOptions, randomName = false } = uploadOptions
-    if (!stsToken && !this.asyncGetOssToken) {
+    if (!stsToken && !this.asyncGetStsToken) {
       throw new Error(
         'relevant authentication information is required before uploading，You should actively pass in the ststoken object, or provide an asynchronous method to get the ststoken object'
       )
@@ -110,8 +110,8 @@ class AliOssUpload {
       if (stsToken) {
         ossConfig = this.getOssConfig(stsToken)
       }
-      if (this.asyncGetOssToken) {
-        const token = await this.asyncGetOssToken()
+      if (this.asyncGetStsToken) {
+        const token = await this.asyncGetStsToken()
         ossConfig = this.getOssConfig(token)
       }
       const ossClient = new AliOss(ossConfig)
