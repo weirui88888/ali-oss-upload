@@ -5,16 +5,15 @@ interface StsToken {
     expiration: string;
     securityToken: string;
 }
-declare type GetOssToken = (...args: any) => Promise<StsToken>;
+declare type AsyncGetStsToken = (...args: any) => Promise<StsToken>;
 interface UploadConfig {
     bucket: string;
     domain: string;
     directory?: string;
     region: string;
     extraUploadOptions?: Record<string, any>;
-    uuid?: boolean;
     log?: boolean;
-    asyncGetOssToken?: GetOssToken;
+    asyncGetStsToken?: AsyncGetStsToken;
 }
 interface ConstructOssKeyOptions {
     name: string;
@@ -30,12 +29,12 @@ interface UploadOptions {
 }
 declare class AliOssUpload {
     bucket: string;
-    domain: string;
+    domain?: string;
     directory: string;
     region: string;
     defaultUploadOption: Record<string, any>;
     log: boolean;
-    asyncGetOssToken?: GetOssToken;
+    asyncGetStsToken?: AsyncGetStsToken;
     constructor(config: UploadConfig);
     getConstructOssKey(options: ConstructOssKeyOptions): string;
     getUuid(): string;
