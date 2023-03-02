@@ -97,7 +97,7 @@ class AliOssUpload {
     }
   }
 
-  async upload(uploadOptions: UploadOptions) {
+  upload = async (uploadOptions: UploadOptions) => {
     const { directory, stsToken, file, extraUploadOptions, randomName = false } = uploadOptions
     if (!stsToken && !this.asyncGetOssToken) {
       throw new Error(
