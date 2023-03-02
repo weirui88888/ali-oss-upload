@@ -47,6 +47,13 @@ declare class AliOssUpload {
         stsToken: string;
         bucket: string;
     };
-    upload: (uploadOptions: UploadOptions) => Promise<AliOss.MultipartUploadResult | undefined>;
+    upload: (uploadOptions: UploadOptions) => Promise<AliOss.MultipartUploadResult | {
+        bucket: string;
+        name: string;
+        etag: string;
+        data: object;
+        res: AliOss.NormalSuccessResponse;
+        ossSrc: string;
+    } | undefined>;
 }
 export default AliOssUpload;

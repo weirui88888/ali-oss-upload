@@ -122,7 +122,12 @@ class AliOssUpload {
         randomName
       })
       const res = await ossClient.multipartUpload(uploadPath, file, uploadOptions)
-      return res
+      return this.domain
+        ? {
+            ossSrc: `${this.domain}${res.name}`,
+            ...res
+          }
+        : res
     } catch (error) {
       console.error(
         'there are some problems uploading, please make sure the relevant settings are correct'
