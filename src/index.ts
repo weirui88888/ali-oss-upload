@@ -1,15 +1,12 @@
 import AliOss from 'ali-oss'
-import type { Options } from 'ali-oss'
-
-// TODO:是否需要日志信息（考虑日志有哪些）
-// TODO:中英文提示设置 zh,en
-// TODO:console.warn提示应采用安全的方式
-// TODO:extraUploadOptions类型
+import languageConfig, { STSTOKEN_NOT_SUPPLY, NOT_USE_STSTOKEN } from './language'
+import type { Options, MultipartUploadOptions } from 'ali-oss'
+import { Language } from './language'
 
 interface StsToken {
   accessKeyId: string
   accessKeySecret: string
-  expiration: string
+  expiration?: string
   securityToken: string
 }
 
@@ -20,9 +17,10 @@ interface UploadConfig {
   domain: string // 自定义域名
   directory?: string // oss目录
   region: string // 地域节点
-  extraUploadOptions?: Record<string, any> // 额外的配置
+  extraUploadOptions?: MultipartUploadOptions // 额外的配置
   log?: boolean // 控制是否打印相关日志，比如上传的文件
-  asyncGetStsToken?: AsyncGetStsToken
+  asyncGetStsToken?: AsyncGetStsToken // 获取ststoken的异步方法，一般是调用后端服务获得
+  language?: keyof typeof Language // 报错提示的语言，支持zh｜en
 }
 
 interface ConstructOssKeyOptions {
@@ -35,17 +33,18 @@ interface UploadOptions {
   stsToken?: StsToken
   file: File
   directory?: string
-  extraUploadOptions?: Record<string, any>
+  extraUploadOptions?: MultipartUploadOptions
   randomName?: boolean | string
 }
 
 class AliOssUpload {
   public bucket: string
   public domain?: string
-  public directory: string
+  public directory?: string
   public region: string
-  public defaultUploadOption: Record<string, any>
+  public defaultUploadOption?: MultipartUploadOptions
   public log: boolean
+  public language?: keyof typeof Language
   public asyncGetStsToken?: AsyncGetStsToken
   constructor(config: UploadConfig) {
     const {
@@ -55,7 +54,8 @@ class AliOssUpload {
       directory = '',
       extraUploadOptions = {},
       asyncGetStsToken,
-      log = false
+      log = false,
+      language = Language.zh
     } = config
     this.bucket = bucket
     this.domain = domain
@@ -64,10 +64,18 @@ class AliOssUpload {
     this.defaultUploadOption = extraUploadOptions
     this.asyncGetStsToken = asyncGetStsToken
     this.log = log
+    this.language = language
+  }
+
+  handelDirectory(directory: string) {
+    if (directory === '' || directory === '/') return ''
+    return directory.replace(/^\/+|\/+$/g, '') + '/'
   }
 
   getConstructOssKey(options: ConstructOssKeyOptions) {
-    const { directory = this.directory, name, randomName } = options
+    const { directory: originDirectory = this.directory } = options
+    const { name, randomName } = options
+    const directory = this.handelDirectory(originDirectory!)
     const type = name.split('.')[1]
     if (randomName) {
       return typeof randomName === 'string'
@@ -100,9 +108,10 @@ class AliOssUpload {
   upload = async (uploadOptions: UploadOptions) => {
     const { directory, stsToken, file, extraUploadOptions, randomName = false } = uploadOptions
     if (!stsToken && !this.asyncGetStsToken) {
-      throw new Error(
-        'relevant authentication information is required before uploading，You should actively pass in the ststoken object, or provide an asynchronous method to get the ststoken object'
-      )
+      throw new Error(languageConfig[this.language!][STSTOKEN_NOT_SUPPLY])
+    }
+    if (stsToken) {
+      console.warn(languageConfig[this.language!][NOT_USE_STSTOKEN])
     }
     const { name } = file
     try {
@@ -114,6 +123,7 @@ class AliOssUpload {
         const token = await this.asyncGetStsToken()
         ossConfig = this.getOssConfig(token)
       }
+
       const ossClient = new AliOss(ossConfig)
       const uploadOptions = extraUploadOptions ?? this.defaultUploadOption
       const uploadPath = this.getConstructOssKey({
@@ -121,17 +131,15 @@ class AliOssUpload {
         directory,
         randomName
       })
-      const res = await ossClient.multipartUpload(uploadPath, file, uploadOptions)
+      const res = await ossClient.multipartUpload(uploadPath, file, uploadOptions!)
       return this.domain
         ? {
             ossSrc: `${this.domain}${res.name}`,
             ...res
           }
         : res
-    } catch (error) {
-      console.error(
-        'there are some problems uploading, please make sure the relevant settings are correct'
-      )
+    } catch (error: any) {
+      console.error(error.message)
     }
   }
 }

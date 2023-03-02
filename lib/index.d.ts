@@ -1,8 +1,10 @@
 import AliOss from 'ali-oss';
+import type { MultipartUploadOptions } from 'ali-oss';
+import { Language } from './language';
 interface StsToken {
     accessKeyId: string;
     accessKeySecret: string;
-    expiration: string;
+    expiration?: string;
     securityToken: string;
 }
 declare type AsyncGetStsToken = (...args: any) => Promise<StsToken>;
@@ -11,9 +13,10 @@ interface UploadConfig {
     domain: string;
     directory?: string;
     region: string;
-    extraUploadOptions?: Record<string, any>;
+    extraUploadOptions?: MultipartUploadOptions;
     log?: boolean;
     asyncGetStsToken?: AsyncGetStsToken;
+    language?: keyof typeof Language;
 }
 interface ConstructOssKeyOptions {
     name: string;
@@ -24,18 +27,20 @@ interface UploadOptions {
     stsToken?: StsToken;
     file: File;
     directory?: string;
-    extraUploadOptions?: Record<string, any>;
+    extraUploadOptions?: MultipartUploadOptions;
     randomName?: boolean | string;
 }
 declare class AliOssUpload {
     bucket: string;
     domain?: string;
-    directory: string;
+    directory?: string;
     region: string;
-    defaultUploadOption: Record<string, any>;
+    defaultUploadOption?: MultipartUploadOptions;
     log: boolean;
+    language?: keyof typeof Language;
     asyncGetStsToken?: AsyncGetStsToken;
     constructor(config: UploadConfig);
+    handelDirectory(directory: string): string;
     getConstructOssKey(options: ConstructOssKeyOptions): string;
     getUuid(): string;
     getOssConfig(options: StsToken): {

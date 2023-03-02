@@ -1,12 +1,12 @@
 {
   "name": "ali-oss-upload",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "support uploading files to ali oss",
   "main": "lib/ali-oss-upload.cjs.js",
   "module": "lib/ali-oss-upload.esm.js",
   "browser": "lib/ali-oss-upload.browser.js",
   "type": "module",
-  "types": "types/index.d.ts",
+  "types": "lib/index.d.ts",
   "files": [
     "src",
     "lib"
