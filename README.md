@@ -12,47 +12,62 @@
   - 该工具库由`typescript`开发，提供类型声明文件
 - 支持`cjs` `esm` `umd`
   - 支持在`nodejs`、`ES模块`、`browser` 环境下使用
-- 自定义配置（用户可根据实际场景进行配置），详细信息见TODO
+- 自定义配置（用户可根据实际场景进行配置），详细信息见 TODO
+- 避免跨项目，跨业务之间来回copy代码
 
 ### 使用方式
 
-**为了方便阅读者理解，下文代码中，配置 key 后面添加`?`的代表该字段非必填，反之则属于必填项，具体含义见TODO**
-
-#### 1.浏览器端直接使用脚本
+下方代码演示的是最**基础**，也是最**标准**的使用方式，目的在于告诉你上手有多easy，更详细化的使用方式请往下阅读
 
 ```javascript
-  // 1.引入相关资源
-  <script src="https://gosspublic.alicdn.com/aliyun-oss-sdk-6.17.1.min.js"></script> // ali oss cdn
-  <script src="./lib/ali-oss-upload.browser.js"></script> // 建议将该文件本地化，或者放在自己公司的cdn资源上
+const { upload } = new AliOssUpload({
+    bucket: '你需要关心的bucket仓库名',
+    region: '你需要关心的bucket地域节点',
+    asyncGetStsToken: (...arg: any[]) => Promise<stsToken>
+})
 
-  // 2.实例化
-  const { upload } = new AliOssUpload({
+upload({
+    file,
+}).then(res => console.log(res))
+```
+
+为了方便阅读者理解，下文代码中，配置 key 后面添加 `?` 的代表该字段非必填，反之则属于必填项，具体含义见 TODO
+
+#### 1. 浏览器端直接使用脚本
+
+```javascript
+// 1.引入相关资源
+<script src="https://gosspublic.alicdn.com/aliyun-oss-sdk-6.17.1.min.js"></script> // ali oss cdn
+<script src = "./lib/ali-oss-upload.browser.js"></script> // 建议将该文件本地化， 或者放在自己公司的cdn资源上
+
+// 2.实例化
+const { upload } = new AliOssUpload({
     bucket: 'bucket仓库名',
-    region: 'bucket区域' // 形如 oss-cn-beijing
-    directory?: '上传至bucket的哪个目录',
-    extraUploadOptions?:'上传的额外配置项TODO',
-    domain?:'bucket自定义域名，配置后，upload方法的返回对象中会包括ossSrc字段，也就是上传文件的真实地址'
-    asyncGetStsToken?:'一个返回Promise stsToken对象的异步方法'
-  })
-	
-  // 3.上传
-  const res = await upload({
+    region: 'bucket地域节点' // 形如 oss-cn-beijing
+    directory ? : '上传至bucket的哪个目录',
+    extraUploadOptions ? : '上传的额外配置项TODO',
+    domain ? : 'bucket自定义域名，配置后，upload方法的返回对象中会包括ossSrc字段，也就是上传文件的真实地址'
+    asyncGetStsToken ? : '一个返回Promise stsToken对象的异步方法'
+})
+
+// 3.上传
+const res = await upload({ // 忽略这里的await，因为一般执行该方法，都是在一个异步函数中
     file: '上传的file，比如input onchange抛出的文件对象，理论上一切File类型的对象都行',
-    directory?: '同上，本次上传的目录会覆盖实例化的基础配置',
-    stsToken?:{
-      accessKeyId: 'your accessKeyId',
-      accessKeySecret: 'your accessKeySecret',
-      securityToken?: 'your sts token'
+    directory ? : '同上，本次上传的目录会覆盖实例化的基础配置',
+    stsToken ? : {
+        accessKeyId: 'your accessKeyId',
+        accessKeySecret: 'your accessKeySecret',
+        securityToken ? : 'your sts token'
     },
-    extraUploadOptions?:'同上，本次上传的目录会覆盖实例化的基础配置'
-    randomName?:'上传文件的名称是否随机，支持字符串类型及布尔类型'
-  })
+    extraUploadOptions ? : '同上，本次上传的目录会覆盖实例化的基础配置'
+    randomName ? : '上传文件的名称是否随机，支持字符串类型及布尔类型'
+})
 ```
 
 上面配置项中，比较难理解的主要有**asyncGetStsToken**及**stsToken**两项，现做如下详细解释
 
 - 它两都是在提供上传文件需要的权限信息，且一般使用是二者择一
-- asyncGetStsToken是一个异步函数，返回类型为stsToken，stsToken就是一个对象，里面有一些权限配置
-- stsToken**应避免直接使用**，自己本地折腾可以，因为这里面的配置信息都是敏感信息,详细解释见[官方文档](https://github.com/ali-sdk/ali-oss#sts-setup)
-- asyncGetStsToken返回的Promise对象正是stsToken，这个应该是你调用你团队中后端接口返回的，具备一定的实效性（会过期）
-- 从工具库的代码逻辑来看，asyncGetStsToken具备更高的优先级，也就是在你两者同时配置的情况下，asyncGetStsToken返回的配置项会替代stsToken
+- asyncGetStsToken 是一个异步函数，返回类型为 stsToken，stsToken 就是一个对象，里面有一些权限配置
+- stsToken**应避免直接使用**，自己本地折腾可以，因为这里面的配置信息都是敏感信息, 详细解释见[官方文档](https://github.com/ali-sdk/ali-oss#sts-setup)
+- asyncGetStsToken 返回的 Promise 对象正是 stsToken，这个应该是你调用你团队中后端接口返回的，具备一定的实效性（会过期）
+- 从工具库的代码逻辑来看，asyncGetStsToken 具备更高的优先级，也就是在你两者同时配置的情况下，asyncGetStsToken 返回的配置项会替代 stsToken
