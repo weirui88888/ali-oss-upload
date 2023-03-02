@@ -1,6 +1,6 @@
 {
   "name": "ali-oss-upload",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "support uploading files to ali oss",
   "main": "lib/ali-oss-upload.cjs.js",
   "module": "lib/ali-oss-upload.esm.js",
@@ -24,9 +24,12 @@
   },
   "keywords": [
     "alioss",
-    "upload"
+    "upload",
+    "multipartUpload",
+    "oss",
+    "bucket"
   ],
-  "author": "",
+  "author": "weirui88888",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/weirui88888/ali-oss-upload/issues"
