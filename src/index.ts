@@ -1,73 +1,81 @@
 import AliOss from 'ali-oss'
-console.log(AliOss)
+import type { Options } from 'ali-oss'
 
-interface OssToken {
+// TODO:是否需要日志信息（考虑日志有哪些）
+// TODO:中英文提示设置 zh,en
+// TODO:console.warn提示应采用安全的方式
+
+interface StsToken {
   accessKeyId: string
   accessKeySecret: string
   expiration: string
   securityToken: string
 }
 
-type GetOssToken = (...args: any) => Promise<OssToken>
+type GetOssToken = (...args: any) => Promise<StsToken>
 
 interface UploadConfig {
   bucket: string // bucket库
   domain: string // 自定义域名
   directory?: string // oss目录
-  fileType?: string // 上传的文件类型
   region: string // 地域节点
   extraUploadOptions?: Record<string, any> // 额外的配置
   uuid?: boolean // 上传的文件名称是否使用uuid作为前缀
-  getOssToken?: GetOssToken
+  log?: boolean // 控制是否打印相关日志，比如上传的文件
+  asyncGetOssToken?: GetOssToken
 }
 
 interface ConstructOssKeyOptions {
-  fileName: string
-  fileType?: string
+  name: string
   directory?: string
+  randomName?: boolean | string
 }
 
 interface UploadOptions {
-  ossToken?: OssToken
-  file: any
+  stsToken?: StsToken
+  file: File
+  directory?: string
   extraUploadOptions?: Record<string, any>
+  randomName?: boolean | string
 }
 
 class AliOssUpload {
   public bucket: string
   public domain: string
   public directory: string
-  public fileType: string
   public region: string
   public defaultUploadOption: Record<string, any>
-  public uuid: boolean
-  public getOssToken?: GetOssToken
+  public log: boolean
+  public asyncGetOssToken?: GetOssToken
   constructor(config: UploadConfig) {
     const {
       bucket,
       domain,
       region,
-      fileType = 'png',
-      directory = '/',
+      directory = '',
       extraUploadOptions = {},
-      uuid = true,
-      getOssToken
+      asyncGetOssToken,
+      log = false
     } = config
     this.bucket = bucket
     this.domain = domain
     this.directory = directory
-    this.fileType = fileType
     this.region = region
     this.defaultUploadOption = extraUploadOptions
-    this.uuid = uuid
-    this.getOssToken = getOssToken
+    this.asyncGetOssToken = asyncGetOssToken
+    this.log = log
   }
 
   getConstructOssKey(options: ConstructOssKeyOptions) {
-    const { fileType = this.fileType, directory = this.directory, fileName } = options
-    return this.uuid
-      ? `${directory}${this.getUuid()}-${fileName}.${fileType}`
-      : `${directory}${fileName}.${fileType}`
+    const { directory = this.directory, name, randomName } = options
+    const type = name.split('.')[1]
+    if (randomName) {
+      return typeof randomName === 'string'
+        ? `${directory}${randomName}.${type}`
+        : `${directory}${this.getUuid()}.${type}`
+    } else {
+      return `${directory}${name}`
+    }
   }
 
   getUuid() {
@@ -77,7 +85,7 @@ class AliOssUpload {
     })
   }
 
-  getOssConfig(options: OssToken) {
+  getOssConfig(options: StsToken) {
     const { accessKeyId, accessKeySecret, securityToken } = options
     return {
       secure: true,
@@ -89,32 +97,36 @@ class AliOssUpload {
     }
   }
 
-  async upload(uploadOptions: UploadOptions & ConstructOssKeyOptions) {
-    const { fileName, fileType, directory, ossToken, file, extraUploadOptions } = uploadOptions
+  async upload(uploadOptions: UploadOptions) {
+    const { directory, stsToken, file, extraUploadOptions, randomName = false } = uploadOptions
+    if (!stsToken && !this.asyncGetOssToken) {
+      throw new Error(
+        'relevant authentication information is required before uploading，You should actively pass in the ststoken object, or provide an asynchronous method to get the ststoken object'
+      )
+    }
+    const { name } = file
     try {
-      let ossConfig
-      if (ossToken) {
-        ossConfig = this.getOssConfig(ossToken)
-      } else if (this.getOssToken) {
-        const token = await this.getOssToken()
+      let ossConfig!: Options
+      if (stsToken) {
+        ossConfig = this.getOssConfig(stsToken)
+      }
+      if (this.asyncGetOssToken) {
+        const token = await this.asyncGetOssToken()
         ossConfig = this.getOssConfig(token)
-      } else {
-        throw new Error('relevant authentication information is required before uploading')
       }
       const ossClient = new AliOss(ossConfig)
       const uploadOptions = extraUploadOptions ?? this.defaultUploadOption
-      const { name } = await ossClient.multipartUpload(
-        this.getConstructOssKey({
-          fileName,
-          fileType,
-          directory
-        }),
-        file,
-        uploadOptions
-      )
-      return name
+      const uploadPath = this.getConstructOssKey({
+        name,
+        directory,
+        randomName
+      })
+      const res = await ossClient.multipartUpload(uploadPath, file, uploadOptions)
+      return res
     } catch (error) {
-      console.error('上传出现了一些问题，请确保相关设置正确')
+      console.error(
+        'there are some problems uploading, please make sure the relevant settings are correct'
+      )
     }
   }
 }
