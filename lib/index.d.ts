@@ -18,7 +18,7 @@ interface GetConfigOptions {
     bucket: string;
     region: string;
 }
-interface UploadConfig {
+interface Config {
     bucket: string;
     domain: string;
     directory?: string;
@@ -42,6 +42,9 @@ interface UploadOptions {
     bucket?: string;
     region?: string;
 }
+interface BatchUploadOptions extends Omit<UploadOptions, 'file'> {
+    files: File[];
+}
 interface InitOssClientOptions {
     asyncGetStsToken?: AsyncGetStsToken;
     bucket?: string;
@@ -56,7 +59,7 @@ declare class AliOssUpload {
     log: boolean;
     language?: keyof typeof Language;
     asyncGetStsToken?: AsyncGetStsToken;
-    constructor(config: UploadConfig);
+    constructor(config: Config);
     handelDirectory(directory: string): string;
     getConstructOssKey(options: ConstructOssKeyOptions): string;
     getUuid(): string;
@@ -78,5 +81,13 @@ declare class AliOssUpload {
         res: AliOss.NormalSuccessResponse;
         ossSrc: string;
     } | undefined>;
+    batchUpload: (batchUploadOptions: BatchUploadOptions) => Promise<(AliOss.MultipartUploadResult | {
+        bucket: string;
+        name: string;
+        etag: string;
+        data: object;
+        res: AliOss.NormalSuccessResponse;
+        ossSrc: string;
+    } | undefined)[] | undefined>;
 }
 export default AliOssUpload;

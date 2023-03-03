@@ -23,7 +23,7 @@ interface GetConfigOptions {
   region: string
 }
 
-interface UploadConfig {
+interface Config {
   bucket: string // bucket库
   domain: string // 自定义域名
   directory?: string // oss目录
@@ -50,6 +50,10 @@ interface UploadOptions {
   region?: string
 }
 
+interface BatchUploadOptions extends Omit<UploadOptions, 'file'> {
+  files: File[]
+}
+
 interface InitOssClientOptions {
   asyncGetStsToken?: AsyncGetStsToken
   bucket?: string
@@ -65,7 +69,7 @@ class AliOssUpload {
   public log: boolean
   public language?: keyof typeof Language
   public asyncGetStsToken?: AsyncGetStsToken
-  constructor(config: UploadConfig) {
+  constructor(config: Config) {
     const {
       bucket,
       domain,
@@ -187,6 +191,26 @@ class AliOssUpload {
         : res
     } catch (error: any) {
       console.error(error.message)
+    }
+  }
+
+  batchUpload = async (batchUploadOptions: BatchUploadOptions) => {
+    // eslint-disable-next-line
+    let { files, ...uploadOptions } = batchUploadOptions
+    files = [...files]
+    try {
+      const uploadQueue = []
+      for (let i = 0; i < files.length; i++) {
+        uploadQueue.push(
+          this.upload({
+            ...uploadOptions,
+            file: files[i]
+          })
+        )
+      }
+      return await Promise.all(uploadQueue)
+    } catch (error: any) {
+      console.log(error.message)
     }
   }
 }
