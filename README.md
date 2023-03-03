@@ -1,3 +1,7 @@
+### 关于
+
+本库，只是为了更加地方便前端开发者进行文件上传至阿里云 oss，所以里面只是基于[ali-oss](https://github.com/ali-sdk/ali-oss)库对上传动作进行了简单地包装，对外只暴露了上传单个文件和批量上传文件的两个方法。如业务有更多细致的要求和场景，比如说列举、删除 bucket 仓库文件等，倒不如直接使用[ali-oss](https://github.com/ali-sdk/ali-oss)来的直接。
+
 ### 简介
 
 最近在做业务的时候，涉及到上传图片到阿里云 OSS 上的需求。查看了之前的项目代码，各个项目中都充斥着相关的代码，逻辑也几乎相同。
@@ -107,14 +111,14 @@ upload({
 
 ### 注意事项
 
-- 上传的bucket**必须**进行跨域设置，可参考[如何开启bucket跨域](https://github.com/ali-sdk/ali-oss#bucket-setup)
-- 提供的stsToken对象，类型要完全匹配，也就是字段值**必须**要准确提供
-- 如果使用cdn方式，请确保引入的ali-oss-sdk版本为6+
-- 初始化的配置项权重小于调用upload方法时传入的配置项，也就是相同字段的配置项，后者会覆盖前者
+- 上传的 bucket**必须**进行跨域设置，可参考[如何开启 bucket 跨域](https://github.com/ali-sdk/ali-oss#bucket-setup)
+- 提供的 stsToken 对象，类型要完全匹配，也就是字段值**必须**要准确提供
+- 如果使用 cdn 方式，请确保引入的 ali-oss-sdk 版本为 6+
+- 初始化的配置项权重小于调用 upload 方法时传入的配置项，也就是相同字段的配置项，后者会覆盖前者
 
 ### 使用技巧
 
-#### 可以通过extraUploadOptions满足你的更多上传场景，比如说需要获取上传进度
+#### 可以通过 extraUploadOptions 满足你的更多上传场景，比如说需要获取上传进度，更多信息请参考[分片上传](https://help.aliyun.com/document_detail/31850.html)
 
 ```javascript
 const res = await upload({
@@ -123,7 +127,13 @@ const res = await upload({
     progress: percent => {
       console.log(percent) // 获取上传进度
     }
+    // ....
   }
 })
 ```
 
+### 参考文档
+
+[什么是对象存储 OSS](https://help.aliyun.com/document_detail/31817.html)
+
+[ali-oss:JavaScript SDK for the Browser and Node.js](https://github.com/ali-sdk/ali-oss)
