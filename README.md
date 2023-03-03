@@ -13,7 +13,7 @@
 - 支持`cjs` `esm` `umd`
   - 支持在`nodejs`、`ES模块`、`browser` 环境下使用
 - 自定义配置（用户可根据实际场景进行配置），详细信息见 TODO
-- 避免跨项目，跨业务之间来回copy代码
+- 避免跨项目，跨业务之间来回 copy 代码
 
 ### 安装
 
@@ -23,7 +23,7 @@ npm install ali-oss-upload
 
 ### 使用方式
 
-下方代码演示的是最**基础**，也是最**标准**的使用方式，目的在于告诉你上手有多easy，在不同场景下更详细化的使用方式请往下阅读
+下方代码演示的是最**基础**，也是最**标准**的使用方式，目的在于告诉你上手有多 easy，在不同场景下更详细化的使用方式请往下阅读
 
 ```javascript
 const { upload } = new AliOssUpload({
@@ -78,39 +78,52 @@ const res = await upload({ // 忽略这里的await，因为一般执行该方法
 - stsToken**应避免直接使用**，自己本地折腾可以，因为这里面的配置信息都是敏感信息, 详细解释见[官方文档](https://github.com/ali-sdk/ali-oss#sts-setup)
 - asyncGetStsToken 返回的 Promise 对象正是 stsToken，这个应该是你调用你团队中后端接口返回的，具备一定的实效性（会过期）
 - 从工具库的代码逻辑来看，asyncGetStsToken 具备更高的优先级，也就是在你两者同时配置的情况下，asyncGetStsToken 返回的配置项会替代 stsToken
-- **无论通过哪种方式提供权限认证信息，都需要确保stsToken对象的key值符合要求（也就是要提供accessKeyId、accessKeySecret、securityToken），本地使用时可不提供securityToken，直接用阿里云提供的accessKeyId和accessKeySecret即可**
+- **无论通过哪种方式提供权限认证信息，都需要确保 stsToken 对象的 key 值符合要求（也就是要提供 accessKeyId、accessKeySecret、securityToken），本地使用时可不提供 securityToken，直接用阿里云提供的 accessKeyId 和 accessKeySecret 即可**
 
-##### 2.模块化
+#### 2.模块化
 
 ```javascript
 import AliOssUpload from 'ali-oss-upload' // esm in browser
 const AliOssUpload = require('ali-oss-upload') // cjs in nodejs
 
-
 // 1.获取stsToken的异步方法
-const asyncGetStsToken = async () :Promise<stsToken> => {
+const asyncGetStsToken = async (): Promise<stsToken> => {
   const stsToken = await axios.get('后端提供的实时获取临时授权token的接口').data
   return stsToken
 }
 
 // 2.实例化
 const { upload } = new AliOssUpload({
-    bucket: '你需要关心的bucket仓库名',
-    region: '你需要关心的bucket地域节点',
-    asyncGetStsToken
+  bucket: '你需要关心的bucket仓库名',
+  region: '你需要关心的bucket地域节点',
+  asyncGetStsToken
 })
 
 // 3.上传，更多自定义参数请参考TODO
 upload({
-    file
+  file
 }).then(res => console.log(res))
 ```
 
+### 注意事项
 
+- 上传的bucket**必须**进行跨域设置，可参考[如何开启bucket跨域](https://github.com/ali-sdk/ali-oss#bucket-setup)
+- 提供的stsToken对象，类型要完全匹配，也就是字段值**必须**要准确提供
+- 如果使用cdn方式，请确保引入的ali-oss-sdk版本为6+
+- 初始化的配置项权重小于调用upload方法时传入的配置项，也就是相同字段的配置项，后者会覆盖前者
 
+### 使用技巧
 
+#### 可以通过extraUploadOptions满足你的更多上传场景，比如说需要获取上传进度
 
-
-
-
+```javascript
+const res = await upload({
+  file,
+  extraUploadOptions: {
+    progress: percent => {
+      console.log(percent) // 获取上传进度
+    }
+  }
+})
+```
 
