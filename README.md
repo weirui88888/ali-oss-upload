@@ -75,9 +75,9 @@ const res = await upload({ // 忽略这里的await，因为一般执行该方法
 
 上面配置项中，关于 asyncGetStsToken 的理解
 
-- asyncGetStsToken 是一个函数，返回的 Promise 对象类型正是 stsToken，且必须是该对象《todo:添加 ststoken 类型》
+- asyncGetStsToken 是一个函数，返回的 Promise 对象类型必须为[stsToken](https://github.com/weirui88888/ali-oss-upload/blob/main/lib/index.d.ts#L4)
 
-- 该函数中你需要做是你调用你团队中后端接口，拿到具备实效性（会过期）的权限认证信息，如果后端返回的字段值不匹配《todo:添加 ststoken 类型》，你需要做一定的转换工作
+- 该函数中你需要做是你调用你团队中后端接口，拿到具备实效性（会过期）的权限认证信息，如果后端返回的字段值不匹配[stsToken](https://github.com/weirui88888/ali-oss-upload/blob/main/lib/index.d.ts#L4)，你需要做一定的转换工作
 - 本地尝鲜的话，且没有后端配合的情况下，你可以只需要提供权限满足的`accessKeyId`和`accessKeySecret`即可，不强求，例如《TODO》
 
 #### 2.模块化
@@ -116,9 +116,9 @@ upload({
 | bucket             | 被操作的bucket     | new AliOssUpload ｜ upload ｜initOssClient | string                                                       |
 | region             | 地域节点           | new AliOssUpload ｜ upload ｜initOssClient | string                                                       |
 | directory          | 上传文件的目录     | new AliOssUpload ｜ upload                 | string                                                       |
-| asyncGetStsToken   | 获取stsToken的方法 | new AliOssUpload ｜ upload ｜initOssClient | (...args: any) => Promise<StsToken>                          |
+| asyncGetStsToken   | 获取stsToken的方法 | new AliOssUpload ｜ upload ｜initOssClient | function                                                     |
 | domain             | bucket自定义域名   | new AliOssUpload                           | domain                                                       |
-| extraUploadOptions | 上传文件额外操作   | new AliOssUpload ｜ upload                 | [extraUploadOptions类型](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/ali-oss/index.d.ts#L503) |
+| extraUploadOptions | 上传文件额外操作   | new AliOssUpload ｜ upload                 | [extraUploadOptions](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/ali-oss/index.d.ts#L503) |
 | language           | 控制台报错提示语言 | new AliOssUpload                           | string(zh\|en)                                               |
 |                    |                    |                                            |                                                              |
 
@@ -127,13 +127,23 @@ upload({
 ### 注意事项
 
 - 上传的 bucket**必须**进行跨域设置，可参考[如何开启 bucket 跨域](https://github.com/ali-sdk/ali-oss#bucket-setup)
-- asyncGetStsToken 函数返回的 stsToken 对象，类型和名称要完全匹配，也就是字段值**必须**要准确提供
+- asyncGetStsToken 函数返回的[stsToken](https://github.com/weirui88888/ali-oss-upload/blob/main/lib/index.d.ts#L4)类型的对象，类型和名称要完全匹配，也就是字段值**必须**要准确提供
 - 如果使用 cdn 方式，请确保引入的 ali-oss-sdk 版本为 6+
 - 初始化的配置项权重小于调用 upload 方法时传入的配置项，也就是相同字段的配置项，后者会覆盖前者
 
 ### 使用技巧
 
-#### 可以通过 extraUploadOptions 满足你的更多上传场景，比如说需要获取上传进度，更多信息请参考[分片上传](https://help.aliyun.com/document_detail/31850.html)
+#### 1.本地尝鲜可以直接这样使用，因为没有后端返回临时权限的token，所以就模拟返回一个即可。切勿将敏感信息提交至线上。真实环境下，这个方法的返回值一定是通过后端返回的，且具备时效性
+
+```javascript
+const asyncGetStsToken = () => Promise.resolve({
+  accessKeyId: 'xxxxxxx',
+  accessKeySecret: 'xxxxxxx',
+  securityToken?: '这个提不提供都行，理论上只要你的accessKeyId及accessKeySecret有访问和操作oss bucket的权限就可以了'
+})
+```
+
+#### 2.可以通过 extraUploadOptions 满足你的更多上传场景，比如说需要获取上传进度，更多信息请参考[分片上传](https://help.aliyun.com/document_detail/31850.html)
 
 ```javascript
 const res = await upload({
