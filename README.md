@@ -114,16 +114,16 @@ upload({
 
 举个🌰：在new AliOssUpload时我们设置了bucket=A，表示接下来调用upload方法上传的文件，都会上传到bucket A中，但是如果我们某次调用upload方法时,传入了bucket=B,那么本次文件会被上传到bucket B中
 
-| 名称               | 含义               | 适用范围                                   | 类型                                                         |
-| :----------------- | :----------------- | :----------------------------------------- | ------------------------------------------------------------ |
-| bucket             | 被操作的bucket     | new AliOssUpload ｜ upload ｜initOssClient | string                                                       |
-| region             | 地域节点           | new AliOssUpload ｜ upload ｜initOssClient | string                                                       |
-| directory          | 上传文件的目录     | new AliOssUpload ｜ upload                 | string                                                       |
-| asyncGetStsToken   | 获取stsToken的方法 | new AliOssUpload ｜ upload ｜initOssClient | function                                                     |
-| domain             | bucket自定义域名   | new AliOssUpload                           | domain                                                       |
-| extraUploadOptions | 上传文件额外操作   | new AliOssUpload ｜ upload                 | [extraUploadOptions](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/ali-oss/index.d.ts#L503) |
-| language           | 控制台报错提示语言 | new AliOssUpload                           | string(zh\|en)                                               |
-|                    |                    |                                            |                                                              |
+| 名称               | 含义                 | 适用范围                                   | 类型                                                         |
+| :----------------- | :------------------- | :----------------------------------------- | ------------------------------------------------------------ |
+| bucket             | 被操作的bucket       | new AliOssUpload ｜ upload ｜initOssClient | string                                                       |
+| region             | 地域节点             | new AliOssUpload ｜ upload ｜initOssClient | string                                                       |
+| directory          | 上传文件的目录       | new AliOssUpload ｜ upload                 | string                                                       |
+| asyncGetStsToken   | 获取stsToken的方法   | new AliOssUpload ｜ upload ｜initOssClient | function                                                     |
+| domain             | bucket自定义域名     | new AliOssUpload                           | domain                                                       |
+| extraUploadOptions | 上传文件额外操作     | new AliOssUpload ｜ upload                 | [extraUploadOptions](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/ali-oss/index.d.ts#L503) |
+| language           | 控制台报错提示语言   | new AliOssUpload                           | string(zh\|en)                                               |
+| randomName         | 上传的文件名是否随机 | upload                                     | boolean \| string                                            |
 
 
 
