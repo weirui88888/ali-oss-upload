@@ -5,9 +5,19 @@ interface StsToken {
     accessKeyId: string;
     accessKeySecret: string;
     expiration?: string;
-    securityToken: string;
+    securityToken?: string;
 }
 declare type AsyncGetStsToken = (...args: any) => Promise<StsToken>;
+interface GetOssConfigOptions {
+    stsToken: StsToken;
+    bucket: string;
+    region: string;
+}
+interface GetConfigOptions {
+    asyncGetStsToken?: AsyncGetStsToken;
+    bucket: string;
+    region: string;
+}
 interface UploadConfig {
     bucket: string;
     domain: string;
@@ -24,11 +34,18 @@ interface ConstructOssKeyOptions {
     randomName?: boolean | string;
 }
 interface UploadOptions {
-    stsToken?: StsToken;
+    asyncGetStsToken?: AsyncGetStsToken;
     file: File;
     directory?: string;
     extraUploadOptions?: MultipartUploadOptions;
     randomName?: boolean | string;
+    bucket?: string;
+    region?: string;
+}
+interface InitOssClientOptions {
+    asyncGetStsToken?: AsyncGetStsToken;
+    bucket?: string;
+    region?: string;
 }
 declare class AliOssUpload {
     bucket: string;
@@ -43,14 +60,16 @@ declare class AliOssUpload {
     handelDirectory(directory: string): string;
     getConstructOssKey(options: ConstructOssKeyOptions): string;
     getUuid(): string;
-    getOssConfig(options: StsToken): {
+    getOssConfig(options: GetOssConfigOptions): {
         secure: boolean;
         region: string;
         accessKeyId: string;
         accessKeySecret: string;
-        stsToken: string;
+        stsToken: string | undefined;
         bucket: string;
     };
+    getConfig: (options: GetConfigOptions) => Promise<AliOss.Options | undefined>;
+    initOssClient: (options: InitOssClientOptions) => Promise<AliOss | undefined>;
     upload: (uploadOptions: UploadOptions) => Promise<AliOss.MultipartUploadResult | {
         bucket: string;
         name: string;

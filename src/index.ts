@@ -1,5 +1,5 @@
 import AliOss from 'ali-oss'
-import languageConfig, { STSTOKEN_NOT_SUPPLY, NOT_USE_STSTOKEN } from './language'
+import languageConfig, { STSTOKEN_NOT_SUPPLY, ASYNC_GET_STSTOKEN_NOT_FUNCTION } from './language'
 import type { Options, MultipartUploadOptions } from 'ali-oss'
 import { Language } from './language'
 
@@ -7,10 +7,21 @@ interface StsToken {
   accessKeyId: string
   accessKeySecret: string
   expiration?: string
-  securityToken: string
+  securityToken?: string
 }
 
 type AsyncGetStsToken = (...args: any) => Promise<StsToken>
+
+interface GetOssConfigOptions {
+  stsToken: StsToken
+  bucket: string
+  region: string
+}
+interface GetConfigOptions {
+  asyncGetStsToken?: AsyncGetStsToken
+  bucket: string
+  region: string
+}
 
 interface UploadConfig {
   bucket: string // bucket库
@@ -30,11 +41,19 @@ interface ConstructOssKeyOptions {
 }
 
 interface UploadOptions {
-  stsToken?: StsToken
+  asyncGetStsToken?: AsyncGetStsToken
   file: File
   directory?: string
   extraUploadOptions?: MultipartUploadOptions
   randomName?: boolean | string
+  bucket?: string
+  region?: string
+}
+
+interface InitOssClientOptions {
+  asyncGetStsToken?: AsyncGetStsToken
+  bucket?: string
+  region?: string
 }
 
 class AliOssUpload {
@@ -93,38 +112,66 @@ class AliOssUpload {
     })
   }
 
-  getOssConfig(options: StsToken) {
-    const { accessKeyId, accessKeySecret, securityToken } = options
+  getOssConfig(options: GetOssConfigOptions) {
+    const { stsToken, region, bucket } = options
+    const { accessKeyId, accessKeySecret, securityToken } = stsToken
     return {
       secure: true,
-      region: this.region,
+      region,
       accessKeyId,
       accessKeySecret,
       stsToken: securityToken,
-      bucket: this.bucket
+      bucket
+    }
+  }
+
+  getConfig = async (options: GetConfigOptions) => {
+    const { asyncGetStsToken, bucket, region } = options
+    if (!asyncGetStsToken && !this.asyncGetStsToken) {
+      throw new Error(languageConfig[this.language!][STSTOKEN_NOT_SUPPLY])
+    }
+    if (asyncGetStsToken && typeof asyncGetStsToken !== 'function')
+      throw new TypeError(languageConfig[this.language!][ASYNC_GET_STSTOKEN_NOT_FUNCTION])
+    if (!asyncGetStsToken && this.asyncGetStsToken && typeof this.asyncGetStsToken !== 'function')
+      throw new TypeError(languageConfig[this.language!][ASYNC_GET_STSTOKEN_NOT_FUNCTION])
+    try {
+      const stsToken = asyncGetStsToken ? await asyncGetStsToken() : await this.asyncGetStsToken!()
+      const ossConfig: Options = this.getOssConfig({
+        stsToken,
+        bucket,
+        region
+      })
+      return ossConfig
+    } catch (error: any) {
+      console.log(error.message)
+    }
+  }
+
+  initOssClient = async (options: InitOssClientOptions) => {
+    try {
+      const { asyncGetStsToken, bucket = this.bucket, region = this.region } = options
+      const ossConfig = await this.getConfig({ asyncGetStsToken, bucket, region })
+      return new AliOss(ossConfig!)
+    } catch (error: any) {
+      console.error(error.message)
     }
   }
 
   upload = async (uploadOptions: UploadOptions) => {
-    const { directory, stsToken, file, extraUploadOptions, randomName = false } = uploadOptions
-    if (!stsToken && !this.asyncGetStsToken) {
-      throw new Error(languageConfig[this.language!][STSTOKEN_NOT_SUPPLY])
-    }
-    if (stsToken) {
-      console.warn(languageConfig[this.language!][NOT_USE_STSTOKEN])
-    }
-    const { name } = file
-    try {
-      let ossConfig!: Options
-      if (stsToken) {
-        ossConfig = this.getOssConfig(stsToken)
-      }
-      if (this.asyncGetStsToken) {
-        const token = await this.asyncGetStsToken()
-        ossConfig = this.getOssConfig(token)
-      }
+    const {
+      directory,
+      asyncGetStsToken,
+      file,
+      extraUploadOptions,
+      randomName = false,
+      bucket = this.bucket,
+      region = this.region
+    } = uploadOptions
 
-      const ossClient = new AliOss(ossConfig)
+    try {
+      const ossConfig = await this.getConfig({ asyncGetStsToken, bucket, region })
+      const { name } = file
+      const ossClient = new AliOss(ossConfig!)
       const uploadOptions = extraUploadOptions ?? this.defaultUploadOption
       const uploadPath = this.getConstructOssKey({
         name,
