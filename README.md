@@ -1,6 +1,6 @@
 ### 关于
 
-本库，只是为了更加地方便前端开发者进行文件上传至阿里云 oss，所以里面只是基于[ali-oss](https://github.com/ali-sdk/ali-oss)库对上传动作进行了简单地包装，对外只暴露了上传单个文件和批量上传文件的两个方法。如业务有更多细致的要求和场景，比如说列举、删除 bucket 仓库文件等操作，可直接调用`initOssClient`来获取到最底层的 `client` 对象，它上面有一切你想要的方法，使用方法直接参考[ali-oss](https://github.com/ali-sdk/ali-oss)即可，详情见 TODO。
+本库，只是为了方便前端开发者进行文件上传至阿里云 oss，所以里面只是基于[ali-oss](https://github.com/ali-sdk/ali-oss)库对上传动作进行了简单地包装，对外只暴露了上传单个文件和批量上传文件的两个方法。如业务有更多细致的要求和场景，比如说列举、删除 bucket 仓库文件等操作，可直接调用`initOssClient`来获取到最底层的 `oss client` 对象，它上面有一切你想要的方法，使用方法直接参考[ali-oss](https://github.com/ali-sdk/ali-oss)即可。代码演示见下方
 
 ### 简介
 
@@ -16,7 +16,7 @@
   - 该工具库由`typescript`开发，提供类型声明文件
 - 支持`cjs` `esm` `umd`
   - 支持在`nodejs`、`ES模块`、`browser` 环境下使用
-- 自定义配置（用户可根据实际场景进行配置），详细信息见 TODO
+- 自定义配置（用户可根据实际场景进行配置）
 - 避免跨项目，跨业务之间来回 copy 代码
 
 ### 安装
@@ -41,7 +41,7 @@ upload({
 }).then(res => console.log(res))
 ```
 
-为了方便阅读者理解，下文代码中，配置 key 后面添加 `?` 的代表该字段非必填，反之则属于必填项，具体含义见 TODO
+为了方便阅读者理解，下文代码中，配置 key 后面添加 `?` 的代表该字段非必填，反之则属于必填项，具体含义见[配置项](https://github.com/weirui88888/ali-oss-upload#配置项)
 
 #### 1.浏览器端直接使用脚本
 
@@ -55,7 +55,7 @@ const { upload } = new AliOssUpload({
     bucket: 'bucket仓库名',
     region: 'bucket地域节点' // 形如 oss-cn-beijing
     directory ? : '上传至bucket的哪个目录',
-    extraUploadOptions ? : '上传的额外配置项TODO',
+    extraUploadOptions ? : '上传的额外配置项',
     domain ? : 'bucket自定义域名，配置后，upload方法的返回对象中会包括ossSrc字段，也就是上传文件的真实地址',
     asyncGetStsToken ? : '一个返回Promise stsToken对象的方法',
     language? 'zh' | 'en' // 控制台日志报错语言，默认中文
@@ -78,7 +78,7 @@ const res = await upload({ // 忽略这里的await，因为一般执行该方法
 - asyncGetStsToken 是一个函数，返回的 Promise 对象类型必须为[stsToken](https://github.com/weirui88888/ali-oss-upload/blob/main/lib/index.d.ts#L4)
 
 - 该函数中你需要做是你调用你团队中后端接口，拿到具备实效性（会过期）的权限认证信息，如果后端返回的字段值不匹配[stsToken](https://github.com/weirui88888/ali-oss-upload/blob/main/lib/index.d.ts#L4)，你需要做一定的转换工作
-- 本地尝鲜的话，且没有后端配合的情况下，你可以只需要提供权限满足的`accessKeyId`和`accessKeySecret`即可，不强求，例如《TODO》
+- 本地尝鲜的话，且没有后端配合的情况下，你可以只需要提供权限满足的`accessKeyId`和`accessKeySecret`即可，不强求，参考[使用技巧](https://github.com/weirui88888/ali-oss-upload#使用技巧)
 
 #### 2.模块化
 
@@ -99,7 +99,7 @@ const { upload } = new AliOssUpload({
   asyncGetStsToken
 })
 
-// 3.上传，更多自定义参数请参考TODO
+// 3.上传，更多自定义参数请参考配置项模块
 upload({
   file
 }).then(res => console.log(res))
@@ -156,6 +156,31 @@ const res = await upload({
   }
 })
 ```
+
+#### 3.如果你除了上传文件，还有其他的需求，例如想看下某个bucket下的文件，那么你可以这样做
+
+```javascript
+const asyncGetStsToken = async () => Promise.resolve({
+  accessKeyId: 'xxxxxx',
+  accessKeySecret: 'xxxxxx'
+})
+
+const { initOssClient } = new AliOssUpload({
+  bucket: 'xxxxx',
+  region: 'xxxxx',
+  asyncGetStsToken
+})
+ 
+ const ossClient = initOssClient()
+ 
+ ossClient.then(client => { // 为了代码美观，你应该使用async await
+   client.list().then(res => {
+     console.log(res) // 获取当前bucket下的文件
+   })
+ })
+```
+
+
 
 ### 参考文档
 
