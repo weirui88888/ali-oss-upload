@@ -50,7 +50,7 @@ upload({
 <script src="https://gosspublic.alicdn.com/aliyun-oss-sdk-6.17.1.min.js"></script> // ali oss cdn
 <script src = "./lib/ali-oss-upload.browser.js"></script> // 建议将该文件本地化， 或者放在自己公司的cdn资源上
 
-// 2.实例化
+// 2.初始化
 const { upload } = new AliOssUpload({
     bucket: 'bucket仓库名',
     region: 'bucket地域节点' // 形如 oss-cn-beijing
@@ -58,16 +58,16 @@ const { upload } = new AliOssUpload({
     extraUploadOptions ? : '上传的额外配置项TODO',
     domain ? : 'bucket自定义域名，配置后，upload方法的返回对象中会包括ossSrc字段，也就是上传文件的真实地址',
     asyncGetStsToken ? : '一个返回Promise stsToken对象的方法',
-  	language? 'zh' | 'en' // 控制台日志报错语言，默认中文
+    language? 'zh' | 'en' // 控制台日志报错语言，默认中文
 })
 
 // 3.上传
 const res = await upload({ // 忽略这里的await，因为一般执行该方法，都是在一个异步函数中
     file: '上传的file，比如input onchange抛出的文件对象，理论上一切File类型的对象都行',
     directory ? : '同上，本次上传的目录会覆盖实例化的基础配置',
-  	bucket ? : '同上，本次上传的bukect会覆盖实例化的基础配置bucket',
-  	region ? : '同上，本次设置的region会覆盖实例化的基础配置region',
-  	asyncGetStsToken ? : '一个返回Promise stsToken对象的方法',
+	bucket ? : '同上，本次上传的bukect会覆盖实例化的基础配置bucket',
+	region ? : '同上，本次设置的region会覆盖实例化的基础配置region',
+	asyncGetStsToken ? : '一个返回Promise stsToken对象的方法',
     extraUploadOptions ? : '同上，本次上传的目录会覆盖实例化的基础配置',
     randomName ? : '上传文件的名称是否随机，支持字符串类型及布尔类型'
 })
@@ -92,7 +92,7 @@ const asyncGetStsToken = async (): Promise<stsToken> => {
   return stsToken
 }
 
-// 2.实例化
+// 2.初始化
 const { upload } = new AliOssUpload({
   bucket: '你需要关心的bucket仓库名',
   region: '你需要关心的bucket地域节点',
@@ -106,6 +106,23 @@ upload({
 ```
 
 ### 配置项
+
+下面列出该库使用过程中涉及的配置项，为了方便知道这些字段再哪些方法中支持使用，现做如下约定，new AliOssUpload 我们称之为初始化，其他的都称之为方法，且方法中相同字段的配置项，会覆盖初始化过程中传入的配置项
+
+举个🌰：在new AliOssUpload时我们设置了bucket=A，表示接下来调用upload方法上传的文件，都会上传到bucket A中，但是如果我们某次调用upload方法时,也传入了bucket=B,那么本次文件会被上传到bucket B中
+
+| 名称               | 含义               | 适用范围                                   | 类型                                                         |
+| :----------------- | :----------------- | :----------------------------------------- | ------------------------------------------------------------ |
+| bucket             | 被操作的bucket     | new AliOssUpload ｜ upload ｜initOssClient | string                                                       |
+| region             | 地域节点           | new AliOssUpload ｜ upload ｜initOssClient | string                                                       |
+| directory          | 上传文件的目录     | new AliOssUpload ｜ upload                 | string                                                       |
+| asyncGetStsToken   | 获取stsToken的方法 | new AliOssUpload ｜ upload ｜initOssClient | (...args: any) => Promise<StsToken>                          |
+| domain             | bucket自定义域名   | new AliOssUpload                           | domain                                                       |
+| extraUploadOptions | 上传文件额外操作   | new AliOssUpload ｜ upload                 | [extraUploadOptions类型](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/ali-oss/index.d.ts#L503) |
+| language           | 控制台报错提示语言 | new AliOssUpload                           | string(zh\|en)                                               |
+|                    |                    |                                            |                                                              |
+
+
 
 ### 注意事项
 
