@@ -1,6 +1,6 @@
 ### 关于
 
-本库，只是为了方便前端开发者进行文件上传至阿里云 oss，所以里面只是基于[ali-oss](https://github.com/ali-sdk/ali-oss)库对上传动作进行了简单地包装，对外只暴露了上传单个文件和批量上传文件的两个方法。如业务有更多细致的需求和场景，比如说[列举](https://github.com/weirui88888/ali-oss-upload#3如果你除了上传文件还有其他的需求例如想看下某个bucket下的文件那么你可以这样做)、删除 bucket 仓库文件等操作，可直接调用`initOssClient`来获取到最底层的 `oss client` 对象，它上面有一切你想要的方法，使用方法直接参考[ali-oss](https://github.com/ali-sdk/ali-oss)即可。
+本库，只是为了方便前端开发者进行文件上传至阿里云 oss，所以里面只是基于[ali-oss](https://github.com/ali-sdk/ali-oss)库对上传动作进行了简单地包装，对外主要暴露了[上传单个文件](https://github.com/weirui88888/ali-oss-upload#upload上传单个文件)和[批量上传文件](https://github.com/weirui88888/ali-oss-upload#batchupload批量上传文件)的两个方法。如业务有更多细致的需求和场景，比如说[列举](https://github.com/weirui88888/ali-oss-upload#3如果你除了上传文件还有其他的需求例如想看下某个bucket下的文件那么你可以这样做)、删除 bucket 仓库文件等操作，可直接调用[initOssClient](https://github.com/weirui88888/ali-oss-upload#initossclient获取操作oss的对象)方法来获取到最底层的 `oss client` 对象，它可以满足你。
 
 ### 简介
 
