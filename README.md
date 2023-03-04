@@ -19,7 +19,7 @@
   - 支持在`nodejs`、`ES模块`、`browser` 环境下使用
 - 配置简单且自由
 - 避免跨项目，跨业务之间来回 copy 代码
-- 使用该库时，遇到的大部分问题，都是在控制台反馈给你，让你知道如何正确使用
+- 使用该库时，遇到的大部分问题，都会在控制台反馈给你，让你知道如何正确使用
 - 库里做了很多兼容处理，举个例子，上传文件的目录，你想怎么写就怎么写，不用关心它的格式，里面已经帮你处理过了
 
 ### 安装
@@ -28,7 +28,9 @@
 npm install ali-oss-upload
 ```
 
-### 使用方式
+### API
+
+#### upload/上传单个文件
 
 下方代码演示的是最**基础**，也是最**标准**的使用方式，目的在于告诉你上手有多 easy，在不同场景下更详细化的使用方式请往下阅读
 
@@ -43,6 +45,38 @@ upload({
     file,
 }).then(res => console.log(res))
 ```
+
+#### batchUpload/批量上传文件
+
+```javascript
+const { batchUpload } = new AliOssUpload({
+    bucket: '你需要关心的bucket仓库名',
+    region: '你需要关心的bucket地域节点',
+    asyncGetStsToken: (...arg: any[]) => Promise<stsToken>
+})
+
+batchUpload({
+    files,
+}).then(res => console.log(res))
+```
+
+#### initOssClient/获取操作oss的对象
+
+```javascript
+const { initOssClient } = new AliOssUpload({
+  bucket: '你需要关心的bucket仓库名',
+  region: '你需要关心的bucket地域节点',
+  asyncGetStsToken: (...arg: any[]) => Promise<stsToken>
+})
+
+const ossClient = initOssClient()
+
+ossClient.then(client => { // client对象上有很多api，具体可查看https://github.com/ali-sdk/ali-oss#bucket-operations
+  client.list() // 例如：获取当前bucket的文件
+})
+```
+
+### 使用方式
 
 为了方便阅读者理解，下文代码中，配置 key 后面添加 `?` 的代表该字段非必填，反之则属于必填项，具体含义见[配置项](https://github.com/weirui88888/ali-oss-upload#配置项)
 
@@ -114,18 +148,16 @@ upload({
 
 举个🌰：在new AliOssUpload时我们设置了bucket=A，表示接下来调用upload方法上传的文件，都会上传到bucket A中，但是如果我们某次调用upload方法时,传入了bucket=B,那么本次文件会被上传到bucket B中
 
-| 名称               | 含义                 | 适用范围                                   | 类型                                                         |
-| :----------------- | :------------------- | :----------------------------------------- | ------------------------------------------------------------ |
-| bucket             | 被操作的bucket       | new AliOssUpload ｜ upload ｜initOssClient | string                                                       |
-| region             | 地域节点             | new AliOssUpload ｜ upload ｜initOssClient | string                                                       |
-| directory          | 上传文件的目录       | new AliOssUpload ｜ upload                 | string                                                       |
-| asyncGetStsToken   | 获取stsToken的方法   | new AliOssUpload ｜ upload ｜initOssClient | function                                                     |
-| domain             | bucket自定义域名     | new AliOssUpload                           | domain                                                       |
-| extraUploadOptions | 上传文件额外操作     | new AliOssUpload ｜ upload                 | [extraUploadOptions](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/ali-oss/index.d.ts#L503) |
-| language           | 控制台报错提示语言   | new AliOssUpload                           | string(zh\|en)                                               |
-| randomName         | 上传的文件名是否随机 | upload                                     | boolean \| string                                            |
-
-
+| 名称               | 含义                 | 适用范围                                                  | 类型                                                         |
+| :----------------- | :------------------- | :-------------------------------------------------------- | ------------------------------------------------------------ |
+| bucket             | 被操作的bucket       | new AliOssUpload ｜ upload ｜batchUpload｜initOssClient   | string                                                       |
+| region             | 地域节点             | new AliOssUpload ｜ upload ｜batchUpload \| initOssClient | string                                                       |
+| directory          | 上传文件的目录       | new AliOssUpload ｜ upload \| batchUpload                 | string                                                       |
+| asyncGetStsToken   | 获取stsToken的方法   | new AliOssUpload ｜ upload ｜batchUpload \| initOssClient | function                                                     |
+| domain             | bucket自定义域名     | new AliOssUpload                                          | domain                                                       |
+| extraUploadOptions | 上传文件额外操作     | new AliOssUpload ｜ upload \| batchUpload                 | [extraUploadOptions](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/ali-oss/index.d.ts#L503) |
+| language           | 控制台报错提示语言   | new AliOssUpload                                          | string(zh\|en)                                               |
+| randomName         | 上传的文件名是否随机 | upload \| batchUpload                                     | boolean \| string                                            |
 
 ### 注意事项
 
@@ -136,7 +168,7 @@ upload({
 
 ### 使用技巧
 
-#### 1.本地尝鲜可以直接这样使用，因为没有后端返回临时权限的token，所以就模拟返回一个即可。切勿将敏感信息提交至线上。真实环境下，这个方法的返回值一定是通过后端返回的，且具备时效性
+> 本地尝鲜可以直接这样使用，因为没有后端返回临时权限的token，所以就模拟返回一个即可。切勿将敏感信息提交至线上。真实环境下，这个方法的返回值一定是通过后端返回的，且具备时效性
 
 ```javascript
 const asyncGetStsToken = () => Promise.resolve({
@@ -146,7 +178,7 @@ const asyncGetStsToken = () => Promise.resolve({
 })
 ```
 
-#### 2.可以通过 extraUploadOptions 满足你的更多上传场景，比如说需要获取上传进度，更多信息请参考[分片上传](https://help.aliyun.com/document_detail/31850.html)
+> 可以通过 extraUploadOptions 满足你的更多上传场景，比如说需要获取上传进度，更多信息请参考[分片上传](https://help.aliyun.com/document_detail/31850.html)
 
 ```javascript
 const res = await upload({
@@ -160,7 +192,7 @@ const res = await upload({
 })
 ```
 
-#### 3.如果你除了上传文件，还有其他的需求，例如想看下某个bucket下的文件，那么你可以这样做
+> 如果你除了上传文件，还有其他的需求，例如想看下某个bucket下的文件，那么你可以这样做
 
 ```javascript
 const asyncGetStsToken = () => Promise.resolve({
@@ -182,8 +214,6 @@ const { initOssClient } = new AliOssUpload({
    })
  })
 ```
-
-
 
 ### 参考文档
 
