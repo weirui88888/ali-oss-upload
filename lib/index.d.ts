@@ -72,7 +72,7 @@ declare class AliOssUpload {
         bucket: string;
     };
     getConfig: (options: GetConfigOptions) => Promise<AliOss.Options | undefined>;
-    initOssClient: (options: InitOssClientOptions) => Promise<AliOss | undefined>;
+    initOssClient: (options?: InitOssClientOptions) => Promise<AliOss | undefined>;
     upload: (uploadOptions: UploadOptions) => Promise<AliOss.MultipartUploadResult | {
         bucket: string;
         name: string;

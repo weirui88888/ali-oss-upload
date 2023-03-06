@@ -151,7 +151,7 @@ class AliOssUpload {
     }
   }
 
-  initOssClient = async (options: InitOssClientOptions) => {
+  initOssClient = async (options: InitOssClientOptions = {}) => {
     try {
       const { asyncGetStsToken, bucket = this.bucket, region = this.region } = options
       const ossConfig = await this.getConfig({ asyncGetStsToken, bucket, region })
