@@ -1,5 +1,9 @@
 import AliOss from 'ali-oss'
-import languageConfig, { STSTOKEN_NOT_SUPPLY, ASYNC_GET_STSTOKEN_NOT_FUNCTION } from './language'
+import languageConfig, {
+  STSTOKEN_NOT_SUPPLY,
+  ASYNC_GET_STSTOKEN_NOT_FUNCTION,
+  STSTOKEN_TYPE_ERROR
+} from './language'
 import type { Options, MultipartUploadOptions } from 'ali-oss'
 import { Language } from './language'
 
@@ -116,6 +120,13 @@ class AliOssUpload {
     })
   }
 
+  checkStsToken(stsToken: any) {
+    if (typeof stsToken !== 'object')
+      throw new TypeError(languageConfig[this.language!][STSTOKEN_TYPE_ERROR])
+    if (!('accessKeyId' in stsToken) || !('accessKeySecret' in stsToken))
+      throw new TypeError(languageConfig[this.language!][STSTOKEN_TYPE_ERROR])
+  }
+
   getOssConfig(options: GetOssConfigOptions) {
     const { stsToken, region, bucket } = options
     const { accessKeyId, accessKeySecret, securityToken } = stsToken
@@ -140,6 +151,7 @@ class AliOssUpload {
       throw new TypeError(languageConfig[this.language!][ASYNC_GET_STSTOKEN_NOT_FUNCTION])
     try {
       const stsToken = asyncGetStsToken ? await asyncGetStsToken() : await this.asyncGetStsToken!()
+      this.checkStsToken(stsToken)
       const ossConfig: Options = this.getOssConfig({
         stsToken,
         bucket,
@@ -147,7 +159,7 @@ class AliOssUpload {
       })
       return ossConfig
     } catch (error: any) {
-      console.log(error.message)
+      console.error(error.message)
     }
   }
 

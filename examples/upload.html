@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>上传单个文件</title>
+    <style>
+      .file {
+        display: block;
+        margin: 2em auto;
+      }
+      .img-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 2em;
+      }
+      .img-container .upload-img {
+        width: 200px;
+        height: 200px;
+        background-repeat: no-repeat;
+        background-size: 150px auto;
+        background-position: center;
+      }
+    </style>
+  </head>
+  <body>
+    <input type="file" class="file" id="file" />
+    <div class="img-container"></div>
+    <pre class="code"></pre>
+  </body>
+  <script src="https://gosspublic.alicdn.com/aliyun-oss-sdk-6.17.1.min.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/axios/1.3.4/axios.min.js"></script>
+  <script src="../lib/ali-oss-upload.browser.js"></script>
+  <script>
+    window.onload = async function () {
+      function showImage(files) {
+        const imgContainer = document.querySelector('.img-container')
+        imgContainer.innerHTML = ''
+        for (let i = 0; i < files.length; i++) {
+          const img = document.createElement('img')
+          img.classList.add('upload-img')
+          img.style.backgroundImage = `url(${window.URL.createObjectURL(files[i])})`
+          imgContainer.appendChild(img)
+        }
+      }
+      function showResult(res) {
+        console.log(res)
+        const code = document.querySelector('.code')
+        code.innerHTML = `上传结果为:\n${JSON.stringify(res, null, 1)}`
+      }
+
+      // 第一步：封装一个获取stsToken的方法
+      const asyncGetStsToken = () => {
+        return Promise.resolve({
+          accessKeyId: '',
+          accessKeySecret: ''
+        })
+      }
+
+      // 第二步：获取upload方法
+      const { upload } = new AliOssUpload({
+        bucket: '',
+        region: '',
+        asyncGetStsToken
+      })
+
+      const file = document.getElementById('file')
+      // 第三步：文件上传，传入file即可，更多配置项可参考 https://github.com/weirui88888/ali-oss-upload
+      file.onchange = async function (e) {
+        const files = e.target.files
+        showImage(files)
+        const res = await upload({
+          file: files[0]
+        })
+        showResult(res)
+      }
+    }
+  </script>
+</html>

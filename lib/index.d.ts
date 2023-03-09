@@ -63,6 +63,7 @@ declare class AliOssUpload {
     handelDirectory(directory: string): string;
     getConstructOssKey(options: ConstructOssKeyOptions): string;
     getUuid(): string;
+    checkStsToken(stsToken: any): void;
     getOssConfig(options: GetOssConfigOptions): {
         secure: boolean;
         region: string;
