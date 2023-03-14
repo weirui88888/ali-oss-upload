@@ -2,9 +2,9 @@
 
 本库，只是为了方便前端开发者进行文件上传至阿里云 oss，所以里面只是基于[ali-oss](https://github.com/ali-sdk/ali-oss)库对上传动作进行了简单地包装，对外主要暴露了[上传单个文件](https://github.com/weirui88888/ali-oss-upload#upload上传单个文件)和[批量上传文件](https://github.com/weirui88888/ali-oss-upload#batchupload批量上传文件)的两个方法。如业务有更多细致的需求和场景，比如说[列举](https://github.com/weirui88888/ali-oss-upload#3如果你除了上传文件还有其他的需求例如想看下某个bucket下的文件那么你可以这样做)、删除 bucket 仓库文件等操作，可直接调用[initOssClient](https://github.com/weirui88888/ali-oss-upload#initossclient获取操作oss的对象)方法来获取到最底层的 `oss client` 对象，它可以满足你。
 
-### 在线配置
+### 在线体验
 
-为了方便用户体验和使用该库，做了一个简单的在线配置工具，你可以通过简单的配置，上传文件至你的bucket中，并会根据你的配置，生成对应的代码，一键copy至你的项目中，即可使用。
+为了方便用户体验和使用该库，做了一个简单的[在线配置工具](https://aliossupload.newarray.vip/)，你可以通过简单的配置，上传文件至你的任意bucket中，并会根据你的配置，生成对应的代码，一键copy至你的项目中，即可使用。
 
 ### 简介
 
@@ -12,7 +12,7 @@
 
 说白了，就是照搬过来改改直接用的。
 
-为了避免这次种每遇到这种需求都 copy 代码的尴尬局面，现对相关代码进行逻辑封装。提供给开发者统一使用
+为了避免这次种每遇到这种需求都 copy 代码的尴尬局面，现对相关代码进行逻辑封装。提供给开发者统一使用。
 
 ### 优点
 
@@ -24,7 +24,7 @@
 - 配置简单且自由
 - 避免跨项目，跨业务之间来回 copy 代码
 - 使用该库时，遇到的大部分问题，都会在控制台反馈给你，让你知道如何正确使用
-- 库里做了很多兼容处理，举个例子，上传文件的目录，你想怎么写就怎么写，不用关心它的格式，里面已经帮你处理过了
+- 库里做了很多兼容处理，举个例子，上传文件的目录，你想怎么写就怎么写，不用关心它的格式，里面已经帮你处理过了，再比如，上传文件的名称支持传入布尔值（是否随机），或者传入字符串自定义名称等
 
 ### 安装
 
@@ -89,7 +89,7 @@ ossClient.then(client => { // client对象上有很多api，具体可查看https
 ```javascript
 // 1.引入相关资源
 <script src="https://gosspublic.alicdn.com/aliyun-oss-sdk-6.17.1.min.js"></script> // ali oss cdn
-<script src="./lib/ali-oss-upload.browser.js"></script> // 建议将该文件本地化，或者放在自己公司的cdn资源上
+<script src="https://aliossupload.newarray.vip/js/ali-oss-upload.browser.js"></script> // 建议将该文件本地化，或者放在自己公司的cdn资源上
 
 // 2.初始化
 const { upload } = new AliOssUpload({
@@ -118,8 +118,8 @@ const res = await upload({ // 忽略这里的await，因为一般执行该方法
 
 - asyncGetStsToken 是一个函数，返回的 Promise 对象类型必须为[stsToken](https://github.com/weirui88888/ali-oss-upload/blob/main/lib/index.d.ts#L4)
 
-- 该函数中你需要做是你调用你团队中后端接口，拿到具备实效性（会过期）的权限认证信息，如果后端返回的字段值不匹配[stsToken](https://github.com/weirui88888/ali-oss-upload/blob/main/lib/index.d.ts#L4)，你需要做一定的转换工作
-- 本地尝鲜的话，且没有后端配合的情况下，你可以只需要提供权限满足的`accessKeyId`和`accessKeySecret`即可，不强求，参考[使用技巧](https://github.com/weirui88888/ali-oss-upload#使用技巧)
+- 该函数中你需要做是你调用你团队中后端接口，拿到具备实效性（会过期）的权限认证信息，如果后端返回的字段值不匹配[stsToken](https://github.com/weirui88888/ali-oss-upload/blob/main/lib/index.d.ts#L4)，你需要做一定的转换工作，具体可参考[使用STS临时访问凭证访问OSS](https://help.aliyun.com/document_detail/100624.html)
+- 本地尝鲜的话，且没有后端配合的情况下，你可以只需要提供权限满足的`accessKeyId`和`accessKeySecret`即可，不强求，可[在线体验](https://aliossupload.newarray.vip/)
 
 #### 2.模块化
 
@@ -165,7 +165,7 @@ upload({
 
 ### 注意事项
 
-- 上传的bucket**必须**进行跨域设置，且跨域设置中允许的Methods必须包括Put，具体可参考[如何开启 bucket 跨域](https://github.com/ali-sdk/ali-oss#bucket-setup)
+- 上传的bucket**必须**进行跨域设置，且**跨域设置中允许的Methods必须包括Put**，具体可参考[如何开启 bucket 跨域](https://github.com/ali-sdk/ali-oss#bucket-setup)
 - asyncGetStsToken 函数返回的[stsToken](https://github.com/weirui88888/ali-oss-upload/blob/main/lib/index.d.ts#L4)类型的对象，类型和字段名必须要完全匹配
 - 如果使用 cdn 方式，请确保引入的 ali-oss-sdk 版本为 6+
 - 初始化的配置项权重小于调用某个方法时传入的配置项，也就是相同字段的配置项，后者会覆盖前者
