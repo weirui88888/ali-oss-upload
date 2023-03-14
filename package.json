@@ -1,5 +1,5 @@
 {
-  "name": "ali-oss-upload",
+  "name": "@newarray/ali-oss-upload",
   "version": "1.0.0",
   "description": "support uploading files to ali oss",
   "main": "lib/ali-oss-upload.cjs.js",

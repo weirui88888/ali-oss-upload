@@ -31,7 +31,7 @@
 ### 安装
 
 ```javascript
-npm install ali-oss-upload
+npm install @newarray/ali-oss-upload
 ```
 
 ### API
@@ -126,8 +126,8 @@ const res = await upload({ // 忽略这里的await，因为一般执行该方法
 #### 2.模块化
 
 ```javascript
-import AliOssUpload from 'ali-oss-upload' // esm in browser
-const AliOssUpload = require('ali-oss-upload') // cjs in nodejs
+import AliOssUpload from '@newarray/ali-oss-upload' // esm in browser
+const AliOssUpload = require('@newarray/ali-oss-upload') // cjs in nodejs
 
 // 1.获取stsToken的方法
 const asyncGetStsToken = (): Promise<stsToken> => {
