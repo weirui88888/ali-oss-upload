@@ -14,7 +14,7 @@ interface StsToken {
   securityToken?: string
 }
 
-type AsyncGetStsToken = (...args: any) => Promise<StsToken>
+type AsyncGetStsToken = (...args: any[]) => Promise<StsToken>
 
 interface GetOssConfigOptions {
   stsToken: StsToken
