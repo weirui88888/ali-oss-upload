@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>ali-oss-upload</title>
+
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <meta name="keywords" content="ali-oss-upload,upload,batchUpload,oss" />
+    <meta name="description" content="一款支持上传文件至阿里云oss的工具库" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png" />
+    <link rel="manifest" href="./site.webmanifest" />
+    <link rel="stylesheet" href="./css/bootstrap.min.css" />
+    <link rel="stylesheet" href="./css/prism.min.css" />
+    <link rel="stylesheet" href="./css/jquery.fancybox.min.css" />
+    <link rel="stylesheet" href="./css/hint.min.css" />
+    <link rel="stylesheet" href="./css/index.css" />
+  </head>
+
+  <body>
+    <div id="app">
+      <div class="upload-loading" v-show="uploading">
+        <svg
+          t="1678770188646"
+          class="logo uploading"
+          viewBox="0 0 1024 1024"
+          version="1.1"
+          xmlns="http://www.w3.org/2000/svg"
+          p-id="2285"
+          width="48"
+          height="48"
+        >
+          <path
+            d="M512 537.002667l181.034667 180.992-60.373334 60.373333L554.666667 700.373333V938.666667h-85.333334v-238.378667l-77.994666 78.08-60.373334-60.373333L512 537.002667zM512 85.333333a298.709333 298.709333 0 0 1 296.704 264.277334 234.666667 234.666667 0 0 1-40.661333 460.117333L768 725.333333a256 256 0 0 0-511.829333-9.6L256 725.333333v84.394667a234.666667 234.666667 0 0 1-40.704-460.117333A298.666667 298.666667 0 0 1 512 85.333333z"
+            p-id="2286"
+            fill="#ff6a00"
+          ></path>
+        </svg>
+      </div>
+      <a
+        href="https://github.com/weirui88888/ali-oss-upload"
+        class="github-corner"
+        aria-label="View source on GitHub"
+        ><svg
+          width="80"
+          height="80"
+          viewBox="0 0 250 250"
+          style="fill: #151513; color: #fff; position: absolute; top: 0; border: 0; right: 0"
+          aria-hidden="true"
+        >
+          <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+          <path
+            d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+            fill="currentColor"
+            style="transform-origin: 130px 106px"
+            class="octo-arm"
+          ></path>
+          <path
+            d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+            fill="currentColor"
+            class="octo-body"
+          ></path></svg
+      ></a>
+      <div class="container mt-3">
+        <div class="row py-2">
+          <h1 class="font-letter text-center" @click="goHomePage">
+            <svg
+              t="1678770188646"
+              class="logo"
+              viewBox="0 0 1024 1024"
+              version="1.1"
+              xmlns="http://www.w3.org/2000/svg"
+              p-id="2285"
+              width="32"
+              height="32"
+            >
+              <path
+                d="M512 537.002667l181.034667 180.992-60.373334 60.373333L554.666667 700.373333V938.666667h-85.333334v-238.378667l-77.994666 78.08-60.373334-60.373333L512 537.002667zM512 85.333333a298.709333 298.709333 0 0 1 296.704 264.277334 234.666667 234.666667 0 0 1-40.661333 460.117333L768 725.333333a256 256 0 0 0-511.829333-9.6L256 725.333333v84.394667a234.666667 234.666667 0 0 1-40.704-460.117333A298.666667 298.666667 0 0 1 512 85.333333z"
+                p-id="2286"
+                fill="#ff6a00"
+              ></path></svg
+            >ali-oss-upload
+          </h1>
+          <h4 class="font-letter text-center">一款可以协助你在项目中方便上传文件至oss的工具库</h4>
+          <div class="text-center mb-5">
+            <span class="badge rounded-pill text-bg-success over-poiner" @click="goHomePage"
+              >简单易上手</span
+            >
+            <span class="badge rounded-pill text-bg-success over-poiner" @click="goHomePage"
+              >多端支持</span
+            >
+            <span class="badge rounded-pill text-bg-success over-poiner" @click="goHomePage"
+              >配置丰富</span
+            >
+            <span class="badge rounded-pill text-bg-success over-poiner" @click="goHomePage"
+              >文档齐全</span
+            >
+          </div>
+          <h4 class="text-center">
+            你只需要通过下方三步骤，即可将该库应用于你的项目之中，并确保符合预期!
+          </h4>
+          <h6 class="text-center mb-5 text-danger font-letter">
+            重要!!：开始使用之前请确保你的oss bucket跨域设置中允许的Methods包括Put
+          </h6>
+        </div>
+        <div class="row">
+          <div class="col-md-4 font-letter">
+            <h3>第一步：输入预设配置</h3>
+            <form novalidate class="needs-validation">
+              <div class="mb-3">
+                <label for="accessKeyId" class="form-label require-flag">accessKeyId</label>
+                <input
+                  required
+                  type="text"
+                  class="form-control"
+                  id="accessKeyId"
+                  v-model.trim="uploadOptions.accessKeyId"
+                  placeholder="请提供accessKeyId"
+                />
+                <div class="valid-feedback">Looks good!</div>
+                <div class="invalid-feedback">Please support accessKeyId.</div>
+              </div>
+              <div class="mb-3">
+                <label for="accessKeySecret" class="form-label require-flag">accessKeySecret</label>
+                <input
+                  required
+                  type="text"
+                  class="form-control"
+                  id="accessKeySecret"
+                  v-model.trim="uploadOptions.accessKeySecret"
+                  placeholder="请提供accessKeySecret"
+                />
+                <div class="valid-feedback">Looks good!</div>
+                <div class="invalid-feedback">Please support accessKeySecret.</div>
+              </div>
+              <div class="mb-3">
+                <label for="bucket" class="form-label require-flag">bucket</label>
+                <input
+                  required
+                  type="text"
+                  class="form-control"
+                  id="bucket"
+                  placeholder="请提供bucket仓库名"
+                  v-model.trim="uploadOptions.bucket"
+                />
+                <div class="valid-feedback">Looks good!</div>
+                <div class="invalid-feedback">Please support bucket.</div>
+              </div>
+              <div class="mb-3">
+                <label for="region" class="form-label require-flag">region</label>
+                <input
+                  required
+                  type="text"
+                  class="form-control"
+                  id="region"
+                  placeholder="请提供region，形如oss-cn-beijing"
+                  v-model.trim="uploadOptions.region"
+                />
+                <div class="valid-feedback">Looks good!</div>
+                <div class="invalid-feedback">Please support region.</div>
+              </div>
+              <div class="mb-3">
+                <label for="domain" class="form-label">domain(可选)</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="domain"
+                  placeholder="提供domain，上传成功后会返回给你自定义域名的文件地址"
+                  v-model.trim="uploadOptions.domain"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="directory" class="form-label">directory(可选)</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="directory"
+                  placeholder="提供directory，上传至bucket仓库的哪个目录下，形如animal/dog"
+                  v-model.trim="uploadOptions.directory"
+                />
+              </div>
+              <div class="form-check mb-3">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  v-model.trim="uploadOptions.randomName"
+                />
+                <label class="form-label" for="randomName"> 随机命名上传文件(可选) </label>
+              </div>
+            </form>
+          </div>
+          <div class="col-md-8">
+            <h3 class="d-sm-flex align-items-center">
+              <span class="me-2">第二步：上传文件，确保符合预期</span>
+              <div class="form-check fs-6 me-2">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="uploadTypeRadio"
+                  id="upload"
+                  v-model="uploadType"
+                  value="upload"
+                />
+                <label class="form-check-label pdt-3" for="upload"> 单个上传 </label>
+              </div>
+              <div class="form-check fs-6 me-2">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="uploadTypeRadio"
+                  id="batchUpload"
+                  v-model="uploadType"
+                  value="batchUpload"
+                />
+                <label class="form-check-label pdt-3" for="batchUpload"> 批量上传 </label>
+              </div>
+            </h3>
+
+            <form>
+              <div class="mb-3">
+                <label class="form-label text-primary ls-label">提示: {{uploadTip}}</label>
+                <div
+                  :class='[{
+                    "hint--top":!canUpload,
+                    "hint--bounce":!canUpload,
+                    "hint--large":!canUpload,
+                    "hint--error":!canUpload,
+                  },"d-block"]'
+                  aria-label="请先完成第一步的必填配置项！"
+                >
+                  <input
+                    type="file"
+                    class="form-control"
+                    id="fileInput"
+                    :disabled="!canUpload"
+                    @change="uploadFile"
+                    :multiple="uploadMultiple"
+                  />
+                </div>
+              </div>
+              <hr class="hr" v-show="showRes" />
+              <div class="mb-3" v-show="showRes">
+                <label class="form-label">上传图片展示</label>
+                <div class="uploaded-gellery-container">
+                  <a :href="ossfile.ossSrc" data-fancybox="gellery" v-for="ossfile in ossFiles">
+                    <image
+                      :title="ossfile.ossSrc"
+                      :src="ossfile.ossSrc"
+                      id="preview"
+                      class="img-fluid uploaded-img"
+                    />
+                  </a>
+                </div>
+              </div>
+              <hr class="hr" v-show="showRes" />
+              <div class="mb-3" v-show="showRes">
+                <label class="form-label">上传图片地址 </label>
+                <div>
+                  <div v-for="(ossfile,index) in ossFiles" class="d-sm-flex align-items-center">
+                    <a :href="ossfile.ossSrc" target="_blank" class="font-letter uploaded-link"
+                      >{{ossfile.ossSrc}}</a
+                    >
+                    <button
+                      :class="['copy-btn','copy-btn-'+index]"
+                      @click.prevent="copyToClipboard(index)"
+                      :data-clipboard-text="ossfile.ossSrc"
+                    >
+                      <svg
+                        t="1678603144700"
+                        class="icon"
+                        viewBox="0 0 1024 1024"
+                        version="1.1"
+                        xmlns="http://www.w3.org/2000/svg"
+                        p-id="11705"
+                        width="18"
+                        height="18"
+                      >
+                        <path
+                          d="M672 832 224 832c-52.928 0-96-43.072-96-96L128 160c0-52.928 43.072-96 96-96l448 0c52.928 0 96 43.072 96 96l0 576C768 788.928 724.928 832 672 832zM224 128C206.368 128 192 142.368 192 160l0 576c0 17.664 14.368 32 32 32l448 0c17.664 0 32-14.336 32-32L704 160c0-17.632-14.336-32-32-32L224 128z"
+                          fill="#5E6570"
+                          p-id="11706"
+                        ></path>
+                        <path
+                          d="M800 960 320 960c-17.664 0-32-14.304-32-32s14.336-32 32-32l480 0c17.664 0 32-14.336 32-32L832 256c0-17.664 14.304-32 32-32s32 14.336 32 32l0 608C896 916.928 852.928 960 800 960z"
+                          fill="#5E6570"
+                          p-id="11707"
+                        ></path>
+                        <path
+                          d="M544 320 288 320c-17.664 0-32-14.336-32-32s14.336-32 32-32l256 0c17.696 0 32 14.336 32 32S561.696 320 544 320z"
+                          fill="#5E6570"
+                          p-id="11708"
+                        ></path>
+                        <path
+                          d="M608 480 288.032 480c-17.664 0-32-14.336-32-32s14.336-32 32-32L608 416c17.696 0 32 14.336 32 32S625.696 480 608 480z"
+                          fill="#5E6570"
+                          p-id="11709"
+                        ></path>
+                        <path
+                          d="M608 640 288 640c-17.664 0-32-14.304-32-32s14.336-32 32-32l320 0c17.696 0 32 14.304 32 32S625.696 640 608 640z"
+                          fill="#5E6570"
+                          p-id="11710"
+                        ></path>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <hr class="hr" v-show="showRes" />
+              <div class="mb-3" v-show="showRes">
+                <label class="form-label">接口返回</label>
+                <div>
+                  <pre class="code"></pre>
+                </div>
+              </div>
+            </form>
+            <div>
+              <h3 class="d-sm-flex align-items-center">
+                <span class="me-2">第三步：复制预设配置至你的项目中</span>
+                <div class="form-check fs-6 me-2">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    name="useMode"
+                    id="browser"
+                    v-model="useMode"
+                    value="browser"
+                  />
+                  <label class="form-check-label pdt-3" for="browser"> browser </label>
+                </div>
+                <div class="form-check fs-6 me-2">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    name="useMode"
+                    id="esm"
+                    v-model="useMode"
+                    value="esm"
+                  />
+                  <label class="form-check-label pdt-3" for="esm"> esm </label>
+                </div>
+                <div class="form-check fs-6 me-2">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    name="useMode"
+                    id="node"
+                    v-model="useMode"
+                    value="node"
+                  />
+                  <label class="form-check-label pdt-3" for="node"> node </label>
+                </div>
+              </h3>
+              <label class="form-label text-danger fw-bolder ls-label"
+                >重要‼️: 'asyncGetStsToken'方法在实际代码应用中应通过接口获取stsToken</label
+              >
+              <pre><code class="language-javascript" id="pre-code" data-prismjs-copy-success="copy success!"></code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="./js/jquery.min.js"></script>
+    <script src="./js/jquery.fancybox.min.js"></script>
+    <script src="./js/aliyun-oss-sdk-6.17.1.min.js"></script>
+    <script src="./js/json-viewer.min.js"></script>
+    <script src="./js/vue2.min.js"></script>
+    <script src="./js/clipboard.min.js"></script>
+    <script src="./js/prism.min.js"></script>
+    <script src="./js/ali-oss-upload.browser.js"></script>
+    <script>
+      const getQuery = key => {
+        let query = window.location.search.substring(1)
+        let querys = query.split('&')
+        for (var i = 0; i < querys.length; i++) {
+          var pair = querys[i].split('=')
+          if (pair[0] === key) {
+            return pair[1]
+          }
+        }
+        return false
+      }
+      const app = new Vue({
+        el: '#app',
+        data: {
+          ossFiles: [],
+          showRes: false,
+          uploadOptions: {
+            bucket: getQuery('bucket') || '',
+            region: getQuery('region') || '',
+            domain: getQuery('domain') || '',
+            directory: getQuery('directory') || '',
+            accessKeyId: getQuery('accessKeyId') || '',
+            accessKeySecret: getQuery('accessKeySecret') || '',
+            randomName: false
+          },
+          canUpload: false,
+          uploader: null,
+          uploadType: 'upload',
+          useMode: 'browser',
+          uploading: false
+        },
+        computed: {
+          uploadTip() {
+            return this.uploadType === 'upload'
+              ? '单个文件上传，只需要传入文件对象file即可'
+              : '批量文件上传，只需要传入文件对象(类数组)files即可'
+          },
+          uploadMultiple() {
+            return this.uploadType === 'batchUpload'
+          },
+          installCode() {
+            return this.useMode === 'browser'
+              ? `// 引入script脚本，为了防止cdn丢失，你可以上传到你自己的cdn服务上
+// https://gosspublic.alicdn.com/aliyun-oss-sdk-6.17.1.min.js
+// https://aliossupload.newarray.vip/js/ali-oss-upload.browser.js
+                  `
+              : this.useMode === 'esm'
+              ? `// npm install ali-oss-upload
+import AliOssUpload from "ali-oss-upload"
+                    `
+              : `// npm install ali-oss-upload
+const AliOssUpload = require("ali-oss-upload")
+                    `
+          }
+        },
+        watch: {
+          uploading(val) {
+            if (val) {
+              this.disableBodyScroll()
+            } else {
+              this.enableBodyScroll()
+            }
+          },
+          uploadOptions: {
+            deep: true,
+            handler(val) {
+              this.reset()
+              this.prepareCode(val)
+              this.generateUploader()
+              const validForm = document.querySelector('.needs-validation')
+              validForm.classList.add('was-validated')
+              const { bucket, region, accessKeyId, accessKeySecret } = val
+              if (bucket && region && accessKeyId && accessKeySecret) {
+                this.canUpload = true
+              } else {
+                this.canUpload = false
+              }
+            }
+          },
+          'uploadOptions.directory': {
+            deep: true,
+            immediate: true,
+            handler(val) {
+              this.uploader = null
+              this.generateUploader()
+            }
+          },
+          'uploadOptions.domain': {
+            deep: true,
+            immediate: true,
+            handler(val) {
+              this.uploader = null
+              this.generateUploader()
+            }
+          },
+          uploadMultiple: {
+            deep: true,
+            immediate: true,
+            handler(val) {
+              this.reset()
+              this.uploader = null
+              this.generateUploader()
+            }
+          },
+          'uploadOptions.randomName': {
+            deep: true,
+            immediate: true,
+            handler(val) {
+              this.uploader = null
+              this.generateUploader()
+            }
+          },
+          canUpload: {
+            immediate: true,
+            handler(valid) {
+              if (valid) {
+                this.generateUploader()
+              } else {
+                this.uploader = null
+              }
+            }
+          },
+          uploadType() {
+            this.prepareCode()
+          },
+          useMode() {
+            this.prepareCode()
+          }
+        },
+        mounted() {
+          this.prepareCode()
+        },
+        methods: {
+          disableBodyScroll() {
+            document.body.style.overflow = 'hidden'
+          },
+          enableBodyScroll() {
+            document.body.style.overflow = 'auto'
+          },
+          copyToClipboard(index) {
+            console.log(index)
+            const clipboard = new ClipboardJS(`.copy-btn-${index}`)
+            let that = this
+            clipboard.on('success', function (event) {
+              that.showTooltip(event.trigger, 'copied!')
+              event.clearSelection()
+            })
+          },
+          showTooltip(elem, msg) {
+            elem.classList.add('hint--bottom')
+            elem.setAttribute('aria-label', msg)
+            setTimeout(function () {
+              elem.classList.remove('hint--bottom')
+            }, 1000)
+          },
+          goHomePage() {
+            window.open('https://github.com/weirui88888/ali-oss-upload', '_blank')
+          },
+          prepareCode(val) {
+            const { accessKeyId, accessKeySecret, bucket, region, domain, directory, randomName } =
+              val || this.uploadOptions
+            if (bucket && region && accessKeyId && accessKeySecret) {
+              this.canUpload = true
+            }
+            const code = `${this.installCode}
+const asyncGetStsToken = () => {
+  return Promise.resolve({
+    accessKeyId: '${accessKeyId}',
+    accessKeySecret: '${accessKeySecret}'
+  })
+}
+
+const { ${this.uploadType} } = new AliOssUpload({
+  bucket:'${bucket}',
+  region:'${region}',
+  domain:'${domain}',
+  asyncGetStsToken,
+  directory:'${directory}'
+})
+
+      ${
+        this.useMode === 'node'
+          ? `
+const uploadFile${this.uploadType === 'upload' ? '' : 's'} = async function (files) {
+  const res = await ${this.uploadType}({
+    ${this.uploadType === 'upload' ? 'file: files[0]' : 'files'},
+    randomName:${randomName}
+  })
+}`
+          : `
+const file = document.getElementById('targetId')
+file.onchange = async function (e) {
+  const files = e.target.files
+  const res = await ${this.uploadType}({
+    ${this.uploadType === 'upload' ? 'file: files[0]' : 'files'},
+    randomName:${randomName}
+  })
+}`
+      }
+                        `
+            document.getElementById('pre-code').innerHTML = code
+            setTimeout(() => {
+              window.Prism.highlightAll()
+            }, 0)
+          },
+          reset() {
+            this.showRes = false
+            this.ossFiles = []
+            const fileInput = document.getElementById('fileInput')
+            fileInput.value = ''
+          },
+          generateAsyncGetStsToken(accessKeyId, accessKeySecret) {
+            return () =>
+              Promise.resolve({
+                accessKeyId,
+                accessKeySecret
+              })
+          },
+
+          generateUploader() {
+            const { bucket, region, domain, accessKeyId, accessKeySecret, directory } =
+              this.uploadOptions
+            const asyncGetStsToken = this.generateAsyncGetStsToken(accessKeyId, accessKeySecret)
+            const { upload, batchUpload } = new AliOssUpload({
+              bucket,
+              region,
+              domain,
+              asyncGetStsToken,
+              directory
+            })
+            this.uploader = this.uploadMultiple ? batchUpload : upload
+          },
+          async uploadFile(e) {
+            this.uploading = true
+            const files = e.target.files
+            const fileConstructor = {}
+            if (this.uploadMultiple) {
+              fileConstructor.files = files
+            } else {
+              fileConstructor.file = files[0]
+            }
+
+            const res = await this.uploader({
+              ...fileConstructor,
+              randomName: this.uploadOptions.randomName
+            })
+
+            if (typeof res !== 'object') {
+              this.reset()
+              alert(res)
+              return
+            }
+            this.ossFiles = this.uploadMultiple ? res : [res]
+            this.uploading = false
+            new JsonViewer({
+              value: res,
+              defaultInspectDepth: 1,
+              displayObjectSize: false,
+              displayDataTypes: false
+            }).render('.code')
+            this.showRes = true
+          }
+        }
+      })
+    </script>
+  </body>
+</html>
