@@ -1,5 +1,9 @@
 import AliOss from 'ali-oss'
-import languageConfig, { STSTOKEN_NOT_SUPPLY, ASYNC_GET_STSTOKEN_NOT_FUNCTION } from './language'
+import languageConfig, {
+  STSTOKEN_NOT_SUPPLY,
+  ASYNC_GET_STSTOKEN_NOT_FUNCTION,
+  STSTOKEN_TYPE_ERROR
+} from './language'
 import type { Options, MultipartUploadOptions } from 'ali-oss'
 import { Language } from './language'
 
@@ -29,7 +33,6 @@ interface Config {
   directory?: string // oss目录
   region: string // 地域节点
   extraUploadOptions?: MultipartUploadOptions // 额外的配置
-  log?: boolean // 控制是否打印相关日志，比如上传的文件
   asyncGetStsToken?: AsyncGetStsToken // 获取ststoken的异步方法，一般是调用后端服务获得
   language?: keyof typeof Language // 报错提示的语言，支持zh｜en
 }
@@ -66,7 +69,6 @@ class AliOssUpload {
   public directory?: string
   public region: string
   public defaultUploadOption?: MultipartUploadOptions
-  public log: boolean
   public language?: keyof typeof Language
   public asyncGetStsToken?: AsyncGetStsToken
   constructor(config: Config) {
@@ -77,17 +79,22 @@ class AliOssUpload {
       directory = '',
       extraUploadOptions = {},
       asyncGetStsToken,
-      log = false,
       language = Language.zh
     } = config
     this.bucket = bucket
-    this.domain = domain
+    this.domain = this.handelDomain(domain)
     this.directory = directory
     this.region = region
     this.defaultUploadOption = extraUploadOptions
     this.asyncGetStsToken = asyncGetStsToken
-    this.log = log
     this.language = language
+  }
+
+  handelDomain(domain?: string) {
+    if (!domain) return
+    if (typeof domain !== 'string') return
+    const regex = /\/$/
+    return regex.test(domain) ? domain : `${domain}/`
   }
 
   handelDirectory(directory: string) {
@@ -99,7 +106,7 @@ class AliOssUpload {
     const { directory: originDirectory = this.directory } = options
     const { name, randomName } = options
     const directory = this.handelDirectory(originDirectory!)
-    const type = name.split('.')[1]
+    const type = name.split('.')[name.split('.').length - 1]
     if (randomName) {
       return typeof randomName === 'string'
         ? `${directory}${randomName}.${type}`
@@ -114,6 +121,13 @@ class AliOssUpload {
       const r = (Math.random() * 16) | 0
       return (c == 'x' ? r : (r & 0x3) | 0x8).toString(16)
     })
+  }
+
+  checkStsToken(stsToken: any) {
+    if (typeof stsToken !== 'object')
+      throw new TypeError(languageConfig[this.language!][STSTOKEN_TYPE_ERROR])
+    if (!('accessKeyId' in stsToken) || !('accessKeySecret' in stsToken))
+      throw new TypeError(languageConfig[this.language!][STSTOKEN_TYPE_ERROR])
   }
 
   getOssConfig(options: GetOssConfigOptions) {
@@ -140,6 +154,7 @@ class AliOssUpload {
       throw new TypeError(languageConfig[this.language!][ASYNC_GET_STSTOKEN_NOT_FUNCTION])
     try {
       const stsToken = asyncGetStsToken ? await asyncGetStsToken() : await this.asyncGetStsToken!()
+      this.checkStsToken(stsToken)
       const ossConfig: Options = this.getOssConfig({
         stsToken,
         bucket,
@@ -147,11 +162,11 @@ class AliOssUpload {
       })
       return ossConfig
     } catch (error: any) {
-      console.log(error.message)
+      console.error(error.message)
     }
   }
 
-  initOssClient = async (options: InitOssClientOptions) => {
+  initOssClient = async (options: InitOssClientOptions = {}) => {
     try {
       const { asyncGetStsToken, bucket = this.bucket, region = this.region } = options
       const ossConfig = await this.getConfig({ asyncGetStsToken, bucket, region })
@@ -188,9 +203,13 @@ class AliOssUpload {
             ossSrc: `${this.domain}${res.name}`,
             ...res
           }
-        : res
+        : {
+            ossSrc: `https://${bucket}.${region}.aliyuncs.com/${res.name}`,
+            ...res
+          }
     } catch (error: any) {
       console.error(error.message)
+      return error.message
     }
   }
 

@@ -7,7 +7,7 @@ interface StsToken {
     expiration?: string;
     securityToken?: string;
 }
-declare type AsyncGetStsToken = (...args: any) => Promise<StsToken>;
+type AsyncGetStsToken = (...args: any) => Promise<StsToken>;
 interface GetOssConfigOptions {
     stsToken: StsToken;
     bucket: string;
@@ -24,7 +24,6 @@ interface Config {
     directory?: string;
     region: string;
     extraUploadOptions?: MultipartUploadOptions;
-    log?: boolean;
     asyncGetStsToken?: AsyncGetStsToken;
     language?: keyof typeof Language;
 }
@@ -56,13 +55,14 @@ declare class AliOssUpload {
     directory?: string;
     region: string;
     defaultUploadOption?: MultipartUploadOptions;
-    log: boolean;
     language?: keyof typeof Language;
     asyncGetStsToken?: AsyncGetStsToken;
     constructor(config: Config);
+    handelDomain(domain?: string): string | undefined;
     handelDirectory(directory: string): string;
     getConstructOssKey(options: ConstructOssKeyOptions): string;
     getUuid(): string;
+    checkStsToken(stsToken: any): void;
     getOssConfig(options: GetOssConfigOptions): {
         secure: boolean;
         region: string;
@@ -72,22 +72,8 @@ declare class AliOssUpload {
         bucket: string;
     };
     getConfig: (options: GetConfigOptions) => Promise<AliOss.Options | undefined>;
-    initOssClient: (options: InitOssClientOptions) => Promise<AliOss | undefined>;
-    upload: (uploadOptions: UploadOptions) => Promise<AliOss.MultipartUploadResult | {
-        bucket: string;
-        name: string;
-        etag: string;
-        data: object;
-        res: AliOss.NormalSuccessResponse;
-        ossSrc: string;
-    } | undefined>;
-    batchUpload: (batchUploadOptions: BatchUploadOptions) => Promise<(AliOss.MultipartUploadResult | {
-        bucket: string;
-        name: string;
-        etag: string;
-        data: object;
-        res: AliOss.NormalSuccessResponse;
-        ossSrc: string;
-    } | undefined)[] | undefined>;
+    initOssClient: (options?: InitOssClientOptions) => Promise<AliOss | undefined>;
+    upload: (uploadOptions: UploadOptions) => Promise<any>;
+    batchUpload: (batchUploadOptions: BatchUploadOptions) => Promise<any[] | undefined>;
 }
 export default AliOssUpload;

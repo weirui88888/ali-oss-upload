@@ -2,6 +2,10 @@
 
 本库，只是为了方便前端开发者进行文件上传至阿里云 oss，所以里面只是基于[ali-oss](https://github.com/ali-sdk/ali-oss)库对上传动作进行了简单地包装，对外主要暴露了[上传单个文件](https://github.com/weirui88888/ali-oss-upload#upload上传单个文件)和[批量上传文件](https://github.com/weirui88888/ali-oss-upload#batchupload批量上传文件)的两个方法。如业务有更多细致的需求和场景，比如说[列举](https://github.com/weirui88888/ali-oss-upload#3如果你除了上传文件还有其他的需求例如想看下某个bucket下的文件那么你可以这样做)、删除 bucket 仓库文件等操作，可直接调用[initOssClient](https://github.com/weirui88888/ali-oss-upload#initossclient获取操作oss的对象)方法来获取到最底层的 `oss client` 对象，它可以满足你。
 
+### 在线配置
+
+为了方便用户体验和使用该库，做了一个简单的在线配置工具，你可以通过简单的配置，上传文件至你的bucket中，并会根据你的配置，生成对应的代码，一键copy至你的项目中，即可使用。
+
 ### 简介
 
 最近在做业务的时候，涉及到上传图片到阿里云 OSS 上的需求。查看了之前的项目代码，各个项目中都充斥着相关的代码，逻辑也几乎相同。
@@ -32,7 +36,7 @@ npm install ali-oss-upload
 
 #### upload/上传单个文件
 
-下方代码演示的是最**基础**，也是最**标准**的使用方式，目的在于告诉你上手有多 easy，在不同场景下更详细化的使用方式请往下阅读
+下方代码演示的是最**基础**，也是最**标准**的使用方式，目的在于告诉你上手有多 easy，在不同场景下更详细化地使用方式请往下阅读
 
 ```javascript
 const { upload } = new AliOssUpload({
@@ -161,7 +165,7 @@ upload({
 
 ### 注意事项
 
-- 上传的 bucket**必须**进行跨域设置，可参考[如何开启 bucket 跨域](https://github.com/ali-sdk/ali-oss#bucket-setup)
+- 上传的bucket**必须**进行跨域设置，且跨域设置中允许的Methods必须包括Put，具体可参考[如何开启 bucket 跨域](https://github.com/ali-sdk/ali-oss#bucket-setup)
 - asyncGetStsToken 函数返回的[stsToken](https://github.com/weirui88888/ali-oss-upload/blob/main/lib/index.d.ts#L4)类型的对象，类型和字段名必须要完全匹配
 - 如果使用 cdn 方式，请确保引入的 ali-oss-sdk 版本为 6+
 - 初始化的配置项权重小于调用某个方法时传入的配置项，也就是相同字段的配置项，后者会覆盖前者
