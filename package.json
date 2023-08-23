@@ -72,5 +72,8 @@
   "dependencies": {
     "@types/ali-oss": "^6.16.7",
     "ali-oss": "^6.17.1"
+  },
+  "volta": {
+    "node": "16.18.0"
   }
 }
