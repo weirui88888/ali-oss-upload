@@ -35,6 +35,15 @@ export default {
       globals: {
         'ali-oss': 'OSS'
       }
+    },
+    {
+      file: pkg.iife,
+      format: 'iife',
+      name: 'AliOssUpload',
+      footer,
+      globals: {
+        'ali-oss': 'OSS'
+      }
     }
   ],
   plugins: [typescript(), commonjs(), resolve(), terser(), json(), builtins()]

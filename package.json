@@ -5,6 +5,7 @@
   "main": "lib/ali-oss-upload.cjs.js",
   "module": "lib/ali-oss-upload.esm.js",
   "browser": "lib/ali-oss-upload.browser.js",
+  "iife": "lib/ali-oss-upload.iife.js",
   "type": "module",
   "types": "lib/index.d.ts",
   "files": [
